@@ -1,50 +1,40 @@
-# React + TypeScript + Vite
+# Plataforma de Inversión
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este proyecto es una plataforma de inversión diseñada y desarrollada con las siguientes tecnologías:
 
-Currently, two official plugins are available:
+- **Frontend**: React con TypeScript, utilizando Vite para el desarrollo rápido y optimizado.
+- **Base de datos**: PostgreSQL como sistema de gestión de base de datos relacional.
+- **Backend**: Implementado con Next.js y Express para gestionar la lógica del lado del servidor y las rutas API.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Descripción del Proyecto
 
-## Expanding the ESLint configuration
+La plataforma está orientada a ofrecer un sistema de inversión accesible y eficiente, donde los usuarios pueden interactuar con una interfaz moderna y rápida, gracias al uso de **React con TypeScript** y **Vite**. El backend se apoya en **Next.js** para el manejo de rutas dinámicas y **Express** para gestionar las API y la comunicación con la base de datos **PostgreSQL**.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+Este proyecto fue desarrollado con fines educativos y forma parte de un proyecto universitario de la **Universidad Tecnológica del Norte de Guanajuato (UTNG)**.
 
-- Configure the top-level `parserOptions` property like this:
+## Tecnologías Utilizadas
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+- **React**: Librería de JavaScript para construir interfaces de usuario.
+- **TypeScript**: Superset de JavaScript que añade tipado estático.
+- **Vite**: Herramienta de desarrollo rápida y ligera.
+- **PostgreSQL**: Sistema de gestión de bases de datos relacional.
+- **Next.js**: Framework de React para aplicaciones del lado del servidor y generación estática.
+- **Express**: Framework para el desarrollo de servidores Node.js.
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+## Autores
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+Este proyecto fue desarrollado por:
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+- Cristian Ismael Prado Salazar
+- Jassiel Noe Manuel Martínez
+- Fernando Moncada Juárez
+
+## Propósito
+
+Este proyecto fue creado como parte de un proyecto universitario en la **Universidad Tecnológica del Norte de Guanajuato (UTNG)**, con el fin de aplicar los conocimientos adquiridos en el desarrollo de aplicaciones web completas, tanto del lado del cliente como del servidor.
+
+## Instalación y Ejecución
+
+1. Clona el repositorio.
+   ```bash
+   git clone https://github.com/usuario/nombre-del-proyecto.git
