@@ -37,4 +37,4 @@ Este proyecto fue creado como parte de un proyecto universitario en la **Univers
 
 1. Clona el repositorio.
    ```bash
-   git clone https://github.com/usuario/nombre-del-proyecto.git
+   git clone https://github.com/IsmaelPrado/Investra.git
