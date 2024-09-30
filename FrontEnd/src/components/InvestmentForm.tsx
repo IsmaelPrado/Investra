@@ -1,7 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import InvestmentResults from './InvestmentResults'; // Asegúrate de importar el nuevo componente
+import { showToast } from '../services/toastrService'; 
 
 const InvestmentForm: React.FC = () => {
+  useEffect(() => {
+    // Verificar si hay que mostrar el toast de éxito
+    const showSuccessToast = localStorage.getItem('showSuccessToast');
+    if (showSuccessToast) {
+        showToast('Inicio de sesión exitoso', 'success');
+        // Limpiar la bandera de localStorage
+        localStorage.removeItem('showSuccessToast');
+    }
+}, []);
   const [amount, setAmount] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
   const [interestRate, setInterestRate] = useState<number>(0);
