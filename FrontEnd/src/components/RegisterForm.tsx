@@ -1,9 +1,8 @@
-// src/components/RegisterForm.tsx
-
 import React, { useState } from 'react';
 import { registerUser } from '../services/userService'; // Importar el servicio
 import { showToast } from '../services/toastrService'; // Importar la función para mostrar mensajes
 import { useNavigate } from 'react-router-dom';
+import logo from '../assets/Investra.png'; // Importar el logotipo desde la carpeta assets
 
 const RegisterForm: React.FC = () => {
     const [username, setUsername] = useState('');
@@ -27,10 +26,37 @@ const RegisterForm: React.FC = () => {
         }
     };
 
+    // Nueva función para redirigir al login
+    const goToLogin = () => {
+        navigate('/login'); // Redirigir a la página de login
+    };
+
     return (
-        <div className="max-w-md mx-auto mt-10">
-            <form onSubmit={handleSubmit} className="bg-gray-900 rounded-lg p-6 shadow-lg w-full">
-                <h2 className="text-2xl font-bold text-white mb-4">Registro de Usuario</h2>
+        <div className="h-screen w-screen bg-gray-900 flex flex-col justify-center items-center">
+            {/* Encabezado con el logotipo y el enlace */}
+            <header className="absolute top-0 w-full flex justify-between items-center p-4">
+                {/* Logotipo en la parte superior izquierda */}
+                <div className="flex items-center">
+                    <img src={logo} alt="Logotipo" className="h-8 mt-4 ml-10" /> {/* Ajusta el tamaño del logotipo según sea necesario */}
+                </div>
+
+                {/* Enlace para iniciar sesión en la parte superior derecha */}
+                <div className='flex items-center p-10'>
+                <h2 className='mr-2'>¿Ya estás registrado?</h2>
+                    <button
+                        onClick={goToLogin}
+                        className="text-blue-500 hover:underline text-lg"
+                    >
+                         <strong>Inicia sesión</strong>
+                    </button>
+                </div>
+            </header>
+
+            {/* Formulario de registro */}
+            <form onSubmit={handleSubmit} className="bg-gray-800 rounded-lg p-8 shadow-lg w-full max-w-md mt-16">
+                <h2 className="text-3xl font-bold text-white mb-6 text-center">Crea tu registro
+                </h2>
+                <p className='mb-10 text-sm'>Te damos la bienvenida a la plataforma que impulsa tu potencial financiero.</p>
 
                 <div className="mb-4">
                     <label htmlFor="username" className="block text-gray-300">Nombre de Usuario:</label>

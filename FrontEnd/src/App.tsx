@@ -32,14 +32,23 @@ function App() {
   return (
     <UserProvider>
       <Router>
-        <Header />
         <Routes>
-          <Route path="/" element={<h1 className="text-2xl">Bienvenido a Investra</h1>} />
+          <Route path="/" element={<LoginForm/>} />
           
           {/* Usa el componente PrivateRoute para proteger las rutas */}
           <Route element={<PrivateRoute />}>
-            <Route path="/invertir" element={<InvestmentForm userName={userName} userBalance={userBalance} />} />
-            <Route path="/noticias" element={<FinancialNews />} />
+            <Route path="/invertir" element={
+              <>
+                <Header /> {/* Header solo aparece en rutas privadas */}
+                <InvestmentForm userName={userName} userBalance={userBalance} />
+              </>
+            } />
+            <Route path="/noticias" element={
+              <>
+                <Header /> {/* Header solo aparece en rutas privadas */}
+                <FinancialNews />
+              </>
+            } />
           </Route>
 
           {/* Usa el componente PublicRoute para proteger las rutas de login y registro */}
