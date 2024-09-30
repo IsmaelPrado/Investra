@@ -2,15 +2,15 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Investra from '../assets/Investra.png';
+import UserProfile from './UserProfile';
 
 const Header: React.FC = () => {
   const user = localStorage.getItem('user');
   const navigate = useNavigate();
 
-  // Función para manejar el logout
   const handleLogout = () => {
-    localStorage.removeItem('user'); // Eliminar el user del localStorage
-    navigate('/login'); // Redirigir al login
+    localStorage.removeItem('user');
+    navigate('/login');
   };
 
   return (
@@ -22,25 +22,29 @@ const Header: React.FC = () => {
           </Link>
         </div>
         <ul className="flex space-x-4 mr-4 items-center">
-          {user && (
+          {user ? (
             <>
               <li>
-                <Link to="/invertir" className="text-lg font-bold hover:text-blue-400">Invertir</Link>
-              </li>
-              <li>
-                <Link to="/perfil" className="text-lg font-bold hover:text-blue-400">Perfil</Link>
-              </li>
-              <li>
-                <button
-                  onClick={handleLogout}
-                  className="text-lg font-bold bg-red-600 text-white py-2 px-4 rounded hover:bg-red-500 transition duration-200"
+                <Link
+                  to="/invertir"
+                  className="flex items-center text-sm hover:opacity-70 transition-opacity duration-200 py-2 px-4 border border-white rounded-md"
                 >
-                  Cerrar Sesión
-                </button>
+                  <span className="material-icons mr-2">trending_up</span>
+                  Invertir
+                </Link>
               </li>
+              <li>
+                <Link
+                  to="/noticias"  // Enlace a noticias
+                  className="flex items-center text-sm hover:opacity-70 transition-opacity duration-200 py-2 px-4 border border-white rounded-md"
+                >
+                  <span className="material-icons mr-2">article</span> {/* Icono para noticias */}
+                  Noticias
+                </Link>
+              </li>
+              <UserProfile user={user} onLogout={handleLogout} />
             </>
-          )}
-          {!user && (
+          ) : (
             <>
               <li>
                 <Link to="/login" className="text-lg font-bold bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-500 transition duration-200">

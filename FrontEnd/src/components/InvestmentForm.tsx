@@ -1,21 +1,28 @@
+// src/components/InvestmentForm.tsx
 import React, { useState, useEffect } from 'react';
-import InvestmentResults from './InvestmentResults'; // Asegúrate de importar el nuevo componente
-import { showToast } from '../services/toastrService'; 
+import InvestmentResults from './InvestmentResults';
+import TransactionModal from './TransactionModal';  // Importa el modal de transacción
+import { showToast } from '../services/toastrService';
 
-const InvestmentForm: React.FC = () => {
+interface InvestmentFormProps {
+  userName: string; // Nombre del usuario
+  userBalance: number; // Saldo del usuario
+}
+
+const InvestmentForm: React.FC<InvestmentFormProps> = ({ userName, userBalance }) => {
   useEffect(() => {
-    // Verificar si hay que mostrar el toast de éxito
     const showSuccessToast = localStorage.getItem('showSuccessToast');
     if (showSuccessToast) {
-        showToast('Inicio de sesión exitoso', 'success');
-        // Limpiar la bandera de localStorage
-        localStorage.removeItem('showSuccessToast');
+      showToast('Inicio de sesión exitoso', 'success');
+      localStorage.removeItem('showSuccessToast');
     }
-}, []);
+  }, []);
+
   const [amount, setAmount] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
   const [interestRate, setInterestRate] = useState<number>(0);
   const [simulationResult, setSimulationResult] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);  // Estado para abrir/cerrar el modal
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,8 +31,21 @@ const InvestmentForm: React.FC = () => {
   };
 
   return (
-    <div className="">
-      <form onSubmit={handleSubmit} className="bg-gray-900 rounded-lg p-6 shadow-lg w-full max-w-md">
+    <div className=" ">
+      {/* Mostrar el nombre y el saldo del usuario en la parte superior */}
+      <div className="bg-gray-800 p-4 rounded-lg shadow-md mb-6 text-center">
+        <h1 className="text-3xl font-bold text-white">Hola, {userName}!</h1>
+        <p className="text-2xl text-gray-300">Saldo disponible: ${userBalance.toFixed(2)}</p>
+          {/* Botón para realizar una transacción */}
+          <button
+            onClick={() => setIsModalOpen(true)}  // Abre el modal al hacer clic
+            className="mt-4 w-full bg-green-600 text-white font-bold py-2 rounded hover:bg-green-500 transition duration-200"
+          >
+            Realizar Transacción
+          </button>
+      </div>
+
+      <form onSubmit={handleSubmit} className="bg-gray-900 rounded-lg p-6 shadow-lg">
         <h2 className="text-2xl font-bold text-white mb-4">Simulación de Inversión</h2>
         
         <div className="mb-4">
@@ -78,6 +98,14 @@ const InvestmentForm: React.FC = () => {
         interestRate={interestRate} 
         result={simulationResult} 
       />
+
+      {/* Modal de transacción */}
+      {isModalOpen && (
+        <TransactionModal 
+          userBalance={userBalance} 
+          onClose={() => setIsModalOpen(false)}  // Cerrar el modal
+        />
+      )}
     </div>
   );
 };

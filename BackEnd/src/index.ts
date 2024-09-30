@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors'; // Middleware para habilitar CORS (Cross-Origin Resource Sharing)
 import dotenv from 'dotenv';
 import userRoutes from './routes/userRoutes';
+import newsRoutes from './routes/newsRoutes';
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use(express.json());
 
 // Usar las rutas de usuarios
 app.use('/usuarios', userRoutes);
+app.use(newsRoutes);
 
 // Iniciar el servidor
 app.listen(PORT, () => {

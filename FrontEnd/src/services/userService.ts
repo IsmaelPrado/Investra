@@ -8,6 +8,7 @@ interface LoginResponse {
         correo: string;
         es_verificado: boolean;
         token: string;
+        saldo: number; // Agregado
     };
 }
 
