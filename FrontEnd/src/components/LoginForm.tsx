@@ -5,10 +5,12 @@ import { showToast } from '../services/toastrService';
 import VerificationModal from './VerificationModal'; // Importar el nuevo componente modal
 import loginImage from '../assets/image.jpeg'; // Importar la imagen para el lado derecho
 import logo from '../assets/Investra.png'; // Importar la imagen del logo
+import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Importar iconos de ojo
 
 const LoginForm: React.FC = () => {
     const [correo, setCorreo] = useState('');
     const [contraseña, setContraseña] = useState('');
+    const [showPassword, setShowPassword] = useState(false); // Estado para controlar visibilidad de la contraseña
     const [showVerificationModal, setShowVerificationModal] = useState(false);
     const [mensaje, setMensaje] = useState('');
     const navigate = useNavigate();
@@ -43,6 +45,10 @@ const LoginForm: React.FC = () => {
         navigate('/registro'); // Redirigir a la página de registro
     };
 
+    // Función para alternar la visibilidad de la contraseña
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
 
     return (
         <div className="h-screen w-screen flex">
@@ -66,16 +72,24 @@ const LoginForm: React.FC = () => {
                         />
                     </div>
 
-                    <div className="mb-4">
+                    <div className="mb-4 relative">
                         <label htmlFor="contraseña" className="block text-gray-300">Contraseña:</label>
                         <input
-                            type="password"
+                            type={showPassword ? 'text' : 'password'} // Cambia el tipo de input según el estado
                             id="contraseña"
                             value={contraseña}
                             onChange={(e) => setContraseña(e.target.value)}
                             className="mt-1 block w-full p-2 bg-gray-700 text-white border border-gray-600 rounded focus:outline-none focus:ring focus:ring-blue-500"
                             required
                         />
+                        {/* Botón de ojo para mostrar/ocultar contraseña */}
+                        <button
+                            type="button"
+                            onClick={togglePasswordVisibility}
+                            className="absolute right-2 top-9 text-gray-400 hover:text-gray-300"
+                        >
+                            {showPassword ? <FaEyeSlash /> : <FaEye />}
+                        </button>
                     </div>
 
                     <button
@@ -96,12 +110,11 @@ const LoginForm: React.FC = () => {
                         </button>
                     </div>
 
-                  
                 </form>
             </div>
             {showVerificationModal && (
-                        <VerificationModal mensaje={mensaje} correo={correo} onClose={() => setShowVerificationModal(false)} />
-                    )}
+                <VerificationModal mensaje={mensaje} correo={correo} onClose={() => setShowVerificationModal(false)} />
+            )}
             {/* Contenedor derecho para la imagen */}
             <div className="w-2/3 bg-gray-200 flex justify-center items-center">
                 <img src={loginImage} alt="Login" className="w-full h-full object-cover" />
