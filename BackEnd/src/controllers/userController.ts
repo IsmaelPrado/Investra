@@ -81,7 +81,8 @@ export const loginUsuario = async (req: Request, res: Response) => {
                             nombre: usuarioPorToken.nombre,
                             correo: usuarioPorToken.correo,
                             es_verificado: usuarioPorToken.es_verificado,
-                            token: usuarioPorToken.token_refresco
+                            token: usuarioPorToken.token_refresco,
+                            saldo: usuarioPorToken.saldo
                         }
                     });
                 }

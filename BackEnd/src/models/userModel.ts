@@ -14,6 +14,7 @@ export interface Usuario {
     fecha_expiracion?: Date;
     fecha_creacion?: Date; // Puedes agregar esta propiedad si la quieres manejar
     fecha_actualizacion?: Date; // Igualmente, si la necesitas
+    saldo?: number;
 }
 
 // Función para crear un nuevo usuario en la base de datos
