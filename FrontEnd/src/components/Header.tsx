@@ -38,8 +38,8 @@ const Header: React.FC = () => {
                   to="/noticias"  // Enlace a noticias
                   className="flex items-center text-sm hover:opacity-70 transition-opacity duration-200 py-2 px-4 border border-white rounded-md"
                 >
-                  <span className="material-icons mr-2">article</span> {/* Icono para noticias */}
-                  Noticias
+                  <span className="material-icons mr-2">school</span> {/* Icono para noticias */}
+                  Academia
                 </Link>
               </li>
               <UserProfile user={user} onLogout={handleLogout} />

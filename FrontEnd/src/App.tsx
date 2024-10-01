@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react';
 import PrivateRoute from './components/PrivateRoute'; // Importa el componente PrivateRoute
 import PublicRoute from './components/PublicRoute'; // Importa el componente PublicRoute
 import 'toastr/build/toastr.min.css'; // Importar estilos de Toastr
-import FinancialNews from './components/FinancialNews';
+import FinancialNews from './components/Academy/Academy';
 
 function App() {
   // Estado para almacenar el nombre y saldo del usuario
