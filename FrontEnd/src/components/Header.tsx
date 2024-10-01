@@ -17,7 +17,7 @@ const Header: React.FC = () => {
     <header className="fixed top-0 left-0 w-full bg-gray-900 p-4 text-white shadow-lg z-50">
       <nav className="flex justify-between items-center">
         <div className="flex items-center ml-4">
-          <Link to="/">
+          <Link to="/invertir">
             <img src={Investra} alt="Investra logo" className="w-32 h-auto" />
           </Link>
         </div>

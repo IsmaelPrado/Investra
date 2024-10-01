@@ -1,7 +1,7 @@
 // src/components/InvestmentForm.tsx
 import React, { useState, useEffect } from 'react';
 import InvestmentResults from './InvestmentResults';
-import TransactionModal from './TransactionModal';  // Importa el modal de transacción
+import TransactionModal from './Transaction/TransactionModal';  // Importa el modal de transacción
 import { showToast } from '../services/toastrService';
 
 interface InvestmentFormProps {
@@ -33,7 +33,7 @@ const InvestmentForm: React.FC<InvestmentFormProps> = ({ userName, userBalance }
   return (
     <div className=" ">
       {/* Mostrar el nombre y el saldo del usuario en la parte superior */}
-      <div className="bg-gray-800 p-4 rounded-lg shadow-md mb-6 text-center">
+      <div className=" p-4 rounded-lg  mb-6 text-center">
         <h1 className="text-3xl font-bold text-white">Hola, {userName}!</h1>
         <p className="text-2xl text-gray-300">Saldo disponible: ${userBalance.toFixed(2)}</p>
           {/* Botón para realizar una transacción */}

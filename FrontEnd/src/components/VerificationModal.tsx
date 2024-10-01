@@ -1,4 +1,3 @@
-// src/components/VerificationModal.tsx
 import React, { useState } from 'react';
 import { verificarCodigo } from '../services/verificationService';  // Importa el servicio
 import { showToast } from '../services/toastrService';
@@ -10,15 +9,30 @@ interface VerificationModalProps {
 }
 
 const VerificationModal: React.FC<VerificationModalProps> = ({ correo, mensaje, onClose }) => {
-    const [codigo, setCodigo] = useState('');
+    const [codigo, setCodigo] = useState(['', '', '', '', '', '']);  // Estado para manejar los 6 inputs
     const [isLoading, setIsLoading] = useState(false);  // Estado para manejar la carga
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+        const { value } = e.target;
+        if (/^[0-9]?$/.test(value)) {  // Permitir solo números de un dígito
+            const newCodigo = [...codigo];
+            newCodigo[index] = value;
+            setCodigo(newCodigo);
+
+            // Mover automáticamente al siguiente input si se ingresa un número
+            if (value && index < 5) {
+                (document.getElementById(`input-${index + 1}`) as HTMLInputElement).focus();
+            }
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
 
         try {
-            const response = await verificarCodigo(correo, codigo);
+            const codigoCompleto = codigo.join('');  // Unir todos los valores de los inputs en un solo string
+            const response = await verificarCodigo(correo, codigoCompleto);
 
             if (response.token) {
                 // Guardar el token y el usuario en el localStorage
@@ -44,16 +58,20 @@ const VerificationModal: React.FC<VerificationModalProps> = ({ correo, mensaje, 
                 <p className="mb-4 text-gray-300">{mensaje}</p>
 
                 <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                        <label htmlFor="codigo" className="block text-gray-400">Código de Verificación:</label>
-                        <input
-                            type="text"
-                            id="codigo"
-                            value={codigo}
-                            onChange={(e) => setCodigo(e.target.value)}
-                            className="mt-1 block w-full p-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:ring focus:ring-blue-500"
-                            required
-                        />
+                    <div className="flex justify-between mb-4">
+                        {codigo.map((num, index) => (
+                            <input
+                                key={index}
+                                type="text"
+                                id={`input-${index}`}
+                                value={codigo[index]}
+                                onChange={(e) => handleChange(e, index)}
+                                className="w-12 h-12 text-center text-2xl bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:ring focus:ring-blue-500"
+                                maxLength={1}  // Solo permitir un número por input
+                                inputMode="numeric"  // Mostrar teclado numérico en dispositivos móviles
+                                required
+                            />
+                        ))}
                     </div>
 
                     <button
