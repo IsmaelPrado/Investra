@@ -16,7 +16,7 @@ const RegisterForm: React.FC = () => {
         try {
             const response = await registerUser(username, email, password);
             showToast(response.message, 'success'); // Mostrar mensaje de éxito
-            navigate('/login'); // Redirigir a la página de login o donde desees
+            navigate('/encuesta'); // Redirigir a la página de login o donde desees
         } catch (err: unknown) {
             if (err instanceof Error) {
                 showToast(err.message, 'error'); // Mostrar mensaje de error
