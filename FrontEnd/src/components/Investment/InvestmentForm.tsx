@@ -1,8 +1,8 @@
 // src/components/InvestmentForm.tsx
 import React, { useState, useEffect } from 'react';
 import InvestmentResults from './InvestmentResults';
-import TransactionModal from './Transaction/TransactionModal';  // Importa el modal de transacción
-import { showToast } from '../services/toastrService';
+import TransactionModal from '../Transaction/TransactionModal';  // Importa el modal de transacción
+import { showToast } from '../../services/toastrService';
 
 interface InvestmentFormProps {
   userName: string; // Nombre del usuario

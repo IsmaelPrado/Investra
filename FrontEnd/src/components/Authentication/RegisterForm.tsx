@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { registerUser } from '../services/userService'; // Importar el servicio
-import { showToast } from '../services/toastrService'; // Importar la función para mostrar mensajes
+import { registerUser } from '../../services/userService'; // Importar el servicio
+import { showToast } from '../../services/toastrService'; // Importar la función para mostrar mensajes
 import { useNavigate } from 'react-router-dom';
-import logo from '../assets/Investra.png'; // Importar el logotipo desde la carpeta assets
+import logo from '../../assets/Investra.png'; // Importar el logotipo desde la carpeta assets
 
 const RegisterForm: React.FC = () => {
     const [username, setUsername] = useState('');

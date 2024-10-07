@@ -1,0 +1,17 @@
+{
+    // Use IntelliSense para saber los atributos posibles.
+    // Mantenga el puntero para ver las descripciones de los existentes atributos.
+    // Para más información, visite: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Iniciar Chrome para localhost",
+            "url": "http://localhost:5173",
+            "webRoot": "${workspaceFolder}/FrontEnd/src",
+            "sourceMaps": true,
+            "runtimeExecutable": "/var/lib/flatpak/app/com.google.Chrome/x86_64/stable/c7bd16b664f297e86e3d3fb9e02b341c4cff59ed123f9ad969bb644c395b05a0/files/extra/google-chrome"
+        }
+    ]
+}

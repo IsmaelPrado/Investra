@@ -24,7 +24,7 @@ export const crearTransaccion = async (transaccion: Transaccion): Promise<Transa
 
         // Insertar la nueva transacción
         const result = await client.query(
-            `INSERT INTO transacciones (usuario_id, cantidad, metodo_pago, proposito, codigo_autenticacion, fecha_creacion, estado)
+            `INSERT INTO transacciones (usuario_id, cantidad, metodo_pago_id, proposito, codigo_autenticacion, fecha_creacion, estado)
              VALUES ($1, $2, $3, $4, '12345', NOW(), 'Realizada') RETURNING *`,
             [usuarioId, cantidad, metodoPagoId, proposito]
         );
@@ -33,7 +33,7 @@ export const crearTransaccion = async (transaccion: Transaccion): Promise<Transa
 
         // Actualizar el sueldo del usuario sumando la cantidad de la transacción
         await client.query(
-            `UPDATE usuarios SET sueldo = sueldo + $1 WHERE id = $2`,
+            `UPDATE usuarios SET saldo = saldo + $1 WHERE id = $2`,
             [cantidad, usuarioId]
         );
 
