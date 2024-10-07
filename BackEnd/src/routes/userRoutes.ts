@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import {  registrarUsuario, obtenerUsuarios, loginUsuario, verificarCodigoVerificacion, verificarTokenPorCorreo } from '../controllers/userController';
+import {  registrarUsuario, obtenerUsuarios, loginUsuario, verificarCodigoVerificacion, verificarTokenPorCorreo, loginUsuarioConCorreo } from '../controllers/userController';
 import { verificarToken } from '../middleware/verificarToken';
 
 const router = Router();
@@ -14,6 +14,7 @@ router.post('/login', loginUsuario);
 router.post('/verificar', verificarCodigoVerificacion);
 // Ruta para verificar el token por correo
 router.post('/verificar-token', verificarTokenPorCorreo);
+router.post('/login-response', loginUsuarioConCorreo)
 
 
 // Rutas protegidas

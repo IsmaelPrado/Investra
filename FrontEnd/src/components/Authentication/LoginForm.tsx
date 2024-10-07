@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { loginUser } from '../services/userService';
+import { loginUser } from '../../services/userService';
 import { useNavigate } from 'react-router-dom';
-import { showToast } from '../services/toastrService';
+import { showToast } from '../../services/toastrService';
 import VerificationModal from './VerificationModal'; // Importar el nuevo componente modal
-import loginImage from '../assets/image.jpeg'; // Importar la imagen para el lado derecho
-import logo from '../assets/Investra.png'; // Importar la imagen del logo
+import loginImage from '../../assets/image.jpeg'; // Importar la imagen para el lado derecho
+import logo from '../../assets/Investra.png'; // Importar la imagen del logo
 import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Importar iconos de ojo
 
 const LoginForm: React.FC = () => {
