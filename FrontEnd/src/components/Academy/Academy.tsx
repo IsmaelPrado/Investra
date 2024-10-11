@@ -67,8 +67,11 @@ const InvestmentCourses: React.FC = () => {
   ];
 
   return (
-    <div className="main-content flex flex-col lg:flex-row w-full ">
-      <div className="w-full lg:w-3/4 p-4 mt-4">
+
+    <div className="main-content flex flex-col lg:flex-row w-full">
+      <div className="w-full lg:w-3/4 p-4">
+
+
         <h1 className="text-4xl font-bold text-center text-white mb-8">Cursos de Inversiones</h1>
         <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 min-h-[180px]">
