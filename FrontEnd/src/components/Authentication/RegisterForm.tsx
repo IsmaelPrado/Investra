@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Importa useNavigate
+import SkipConfirmationModal from './CloseMessage';  // Importa el componente de confirmación
 
 const Quiz: React.FC = () => {
+  const navigate = useNavigate(); // Inicializa useNavigate
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<string[]>(Array(5).fill('')); // Para almacenar respuestas
+  const [showSkipConfirmation, setShowSkipConfirmation] = useState(false); // Para mostrar el modal de confirmación
 
   const questions = [
     {
@@ -34,8 +38,7 @@ const Quiz: React.FC = () => {
       ],
     },
     {
-      question:
-        '¿Qué porcentaje de tus ahorros estás dispuesto a invertir en activos de riesgo (acciones, criptomonedas, etc.)?',
+      question: '¿Qué porcentaje de tus ahorros estás dispuesto a invertir en activos de riesgo (acciones y bonos)?',
       options: ['Menos del 10%.', 'Entre 10% y 30%.', 'Más del 30%.'],
     },
   ];
@@ -58,13 +61,52 @@ const Quiz: React.FC = () => {
     }
   };
 
-  const handleFinish = () => {
-    console.log('Respuestas del usuario:', answers);
-    alert('Has finalizado el cuestionario.');
+  // Nueva función para redirigir al registro
+  const goToRegister = () => {
+    navigate('/login'); // Redirigir a la página de registro
   };
+
+  const handleFinish = () => {
+    goToRegister(); // Redirigir al finalizar
+  };
+
+  const handleSkip = () => {
+    setShowSkipConfirmation(true);  // Mostrar el modal de confirmación
+  };
+
+  const cancelSkip = () => {
+    setShowSkipConfirmation(false); // Cierra el modal si el usuario cancela
+  };
+
+  const handleConfirmSkip = () => {
+    setShowSkipConfirmation(false); // Oculta el modal
+    goToRegister(); // Redirigir al omitir
+  };
+
+  // Cálculo del porcentaje de progreso
+  const progressPercentage = ((currentQuestion + 1) / questions.length) * 100;
 
   return (
     <div className="flex flex-col items-center justify-center h-screen w-screen bg-gray-900 text-white p-4">
+        
+      {/* Círculo rojo con una "X" para cancelar */}
+      <div className="absolute top-16 right-4" style={{ right: '400px' }}>
+        <button
+          onClick={handleSkip} // Llama a la misma función de "omitir"
+          className="text-white duration-200 p-8"
+        >
+          <span className="text-xxl">✖</span> {/* Aumentar el tamaño de la X */}
+        </button>
+      </div>
+
+      {/* Barra de progreso */}
+      <div className="w-full max-w-xl bg-gray-700 rounded-full h-2 mb-6">
+        <div
+          className="bg-blue-500 h-2 rounded-full"
+          style={{ width: `${progressPercentage}%` }}
+        ></div>
+      </div>
+
       <h1 className="text-3xl font-bold mb-8 text-center">{questions[currentQuestion].question}</h1>
 
       <div className="grid grid-cols-1 gap-4 w-full max-w-xl">
@@ -74,7 +116,11 @@ const Quiz: React.FC = () => {
             className={`p-4 border rounded-lg transition-all duration-200 w-full ${
               answers[currentQuestion] === option ? 'bg-blue-500' : 'bg-gray-700 hover:bg-gray-600'
             }`}
-            onClick={() => handleOptionSelect(option)}
+            onClick={() => handleOptionSelect(option)}  // Seleccionar opción
+            onDoubleClick={() => {                      // Doble clic para avanzar
+              handleOptionSelect(option);  // Selecciona la opción
+              nextQuestion();              // Avanza a la siguiente pregunta
+            }}
           >
             {option}
           </button>
@@ -112,6 +158,24 @@ const Quiz: React.FC = () => {
           </button>
         )}
       </div>
+
+      {/* Botón para omitir el formulario */}
+      <div className="mt-4">
+        <button
+          onClick={handleSkip}
+          className="text-gray-400 hover:text-gray-200 text-sm"
+        >
+          Omitir
+        </button>
+      </div>
+
+      {/* Renderizar el modal de confirmación solo si está visible */}
+      {showSkipConfirmation && (
+        <SkipConfirmationModal
+          onConfirm={handleConfirmSkip} // Cambia aquí para que llame a la función que redirige
+          onCancel={cancelSkip}  // Cierra el modal cuando se cancela
+        />
+      )}
     </div>
   );
 };

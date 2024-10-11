@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Investra from '../assets/Investra.png';
-import UserProfile from './UserProfile';
+import UserProfile from './Authentication/UserProfile';
 
 const Header: React.FC = () => {
   const user = localStorage.getItem('user');
@@ -17,7 +17,7 @@ const Header: React.FC = () => {
     <header className="fixed top-0 left-0 w-full bg-gray-900 p-4 text-white shadow-lg z-50">
       <nav className="flex justify-between items-center">
         <div className="flex items-center ml-4">
-          <Link to="/">
+          <Link to="/invertir">
             <img src={Investra} alt="Investra logo" className="w-32 h-auto" />
           </Link>
         </div>
@@ -38,8 +38,8 @@ const Header: React.FC = () => {
                   to="/noticias"  // Enlace a noticias
                   className="flex items-center text-sm hover:opacity-70 transition-opacity duration-200 py-2 px-4 border border-white rounded-md"
                 >
-                  <span className="material-icons mr-2">article</span> {/* Icono para noticias */}
-                  Noticias
+                  <span className="material-icons mr-2">school</span> {/* Icono para noticias */}
+                  Academia
                 </Link>
               </li>
               <UserProfile user={user} onLogout={handleLogout} />
