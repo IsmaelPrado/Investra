@@ -1,6 +1,6 @@
 
 import { Request, Response } from 'express';
-import { obtenerTodosLosMetodosPago as MetodosPago, insertarBilleteraDigital, insertarTarjetaCredito, insertarTransferenciaBanco } from '../models/Transactions/paymentMethod';
+import { obtenerTodosLosMetodosPago as MetodosPago, contarBilleterasPorUsuario, insertarBilleteraDigital, insertarTarjetaCredito, insertarTransferenciaBanco, obtenerBilleteraDigitalPorUsuario, obtenerTarjetaCreditoPorUsuario, obtenerTransferenciaBancoPorUsuario } from '../models/Transactions/paymentMethod';
 // Controlador para obtener MetodosPago
 export const obtenerTodosLosMetodosPago = async (req: Request, res: Response): Promise<Response> => {
     try {
@@ -15,14 +15,14 @@ export const obtenerTodosLosMetodosPago = async (req: Request, res: Response): P
 
 // Controlador para insertar una nueva transferencia bancaria
 export const crearTransferenciaBanco = async (req: Request, res: Response): Promise<Response> => {
-    const { transaccion_id, nombre_banco, numero_cuenta, clabe_o_iban } = req.body;
+    const {  nombre_banco, numero_cuenta, clabe_o_iban, user_id } = req.body;
 
-    if (!transaccion_id || !nombre_banco || !numero_cuenta || !clabe_o_iban) {
+    if (  !nombre_banco || !numero_cuenta || !clabe_o_iban || !user_id) {
         return res.status(400).json({ message: 'Todos los campos son requeridos.' });
     }
 
     try {
-        await insertarTransferenciaBanco({ nombre_banco, numero_cuenta, clabe_o_iban });
+        await insertarTransferenciaBanco({ nombre_banco, numero_cuenta, clabe_o_iban, user_id });
         return res.status(201).json({ message: 'Transferencia bancaria creada exitosamente.' });
     } catch (error) {
         console.error('Error al crear transferencia bancaria:', error);
@@ -30,16 +30,33 @@ export const crearTransferenciaBanco = async (req: Request, res: Response): Prom
     }
 };
 
+// Controlador para obtener Transferencia Bancaria por usuario
+export const obtenerTransferenciaBanco = async (req: Request, res: Response): Promise<Response> => {
+    const { user_id } = req.params;
+
+    try {
+        const transferencias = await obtenerTransferenciaBancoPorUsuario(Number(user_id));
+        if (transferencias) {
+            return res.status(200).json(transferencias);
+        } else {
+            return res.status(404).json({ message: 'No se encontraron transferencias bancarias para este usuario.' });
+        }
+    } catch (error) {
+        console.error('Error al obtener transferencia bancaria:', error);
+        return res.status(500).json({ message: 'Error al obtener transferencia bancaria.' });
+    }
+};
+
 // Controlador para insertar una nueva tarjeta de crédito/débito
 export const crearTarjetaCredito = async (req: Request, res: Response): Promise<Response> => {
-    const { transaccion_id, numero_tarjeta, fecha_vencimiento, cvv, nombre_titular } = req.body;
+    const { numero_tarjeta, fecha_vencimiento, cvv, nombre_titular, user_id } = req.body;
 
-    if (!transaccion_id || !numero_tarjeta || !fecha_vencimiento || !cvv || !nombre_titular) {
+    if ( !numero_tarjeta || !fecha_vencimiento || !cvv || !nombre_titular || !user_id) {
         return res.status(400).json({ message: 'Todos los campos son requeridos.' });
     }
 
     try {
-        await insertarTarjetaCredito({ numero_tarjeta, fecha_vencimiento, cvv, nombre_titular });
+        await insertarTarjetaCredito({ numero_tarjeta, fecha_vencimiento, cvv, nombre_titular, user_id });
         return res.status(201).json({ message: 'Tarjeta de crédito/débito creada exitosamente.' });
     } catch (error) {
         console.error('Error al crear tarjeta de crédito/débito:', error);
@@ -47,19 +64,63 @@ export const crearTarjetaCredito = async (req: Request, res: Response): Promise<
     }
 };
 
+// Controlador para obtener Tarjeta de Crédito/Débito por usuario
+export const obtenerTarjetaCredito = async (req: Request, res: Response): Promise<Response> => {
+    const { user_id } = req.params;
+
+    try {
+        const tarjetas = await obtenerTarjetaCreditoPorUsuario(Number(user_id));
+        if (tarjetas) {
+            return res.status(200).json(tarjetas);
+        } else {
+            return res.status(404).json({ message: 'No se encontraron tarjetas de crédito para este usuario.' });
+        }
+    } catch (error) {
+        console.error('Error al obtener tarjeta de crédito/débito:', error);
+        return res.status(500).json({ message: 'Error al obtener tarjeta de crédito/débito.' });
+    }
+};
+
 // Controlador para insertar una nueva billetera digital
 export const crearBilleteraDigital = async (req: Request, res: Response): Promise<Response> => {
-    const { transaccion_id, direccion_billetera } = req.body;
+    const { direccion_billetera, user_id } = req.body;
 
-    if (!transaccion_id || !direccion_billetera) {
+    if (!direccion_billetera || !user_id) {
         return res.status(400).json({ message: 'Todos los campos son requeridos.' });
     }
 
     try {
-        await insertarBilleteraDigital({ direccion_billetera });
+        // Verificar cuántas billeteras tiene el usuario
+        const totalBilleteras = await contarBilleterasPorUsuario(user_id);
+        
+        // Si el usuario ya tiene 5 billeteras, devolver un error
+        if (totalBilleteras >= 5) {
+            return res.status(400).json({ message: 'El usuario ya tiene la cantidad máxima de 5 billeteras digitales.' });
+        }
+
+        // Insertar la nueva billetera digital
+        await insertarBilleteraDigital({ direccion_billetera, user_id });
         return res.status(201).json({ message: 'Billetera digital creada exitosamente.' });
     } catch (error) {
         console.error('Error al crear billetera digital:', error);
         return res.status(500).json({ message: 'Error al crear billetera digital.' });
+    }
+};
+
+
+// Controlador para obtener Billetera Digital por usuario
+export const obtenerBilleteraDigital = async (req: Request, res: Response): Promise<Response> => {
+    const { user_id } = req.params;
+
+    try {
+        const billeteras = await obtenerBilleteraDigitalPorUsuario(Number(user_id));
+        if (billeteras) {
+            return res.status(200).json(billeteras);
+        } else {
+            return res.status(404).json({ message: 'No se encontraron billeteras digitales para este usuario.' });
+        }
+    } catch (error) {
+        console.error('Error al obtener billetera digital:', error);
+        return res.status(500).json({ message: 'Error al obtener billetera digital.' });
     }
 };

@@ -16,13 +16,11 @@
 }
 
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+/* index.css o App.css */
+.main-content {
+  padding-top: 70px; /* Ajusta esta altura según la altura real del header */
 }
+
 
 h1 {
   font-size: 3.2em;

@@ -1,21 +1,40 @@
+// src/components/TransactionModal.tsx
 import React, { useEffect, useState } from "react";
 import { showToast } from "../../services/toastrService";
-import {
-  getPaymentMethods,
-  PaymentMethod,
-} from "../../services/paymentMethodService";
-import BankTransfer from "./BankTransfer";
-import CreditCard from "./CreditCard";
-import Wallet from "./DigitalWallet";
+import { crearBilleteraDigital, getPaymentMethods, PaymentMethod, crearTransferenciaBanco } from "../../services/paymentMethodService";
 import ConfirmationModal from "./ConfirmationModal";
-import mxIcon from "../../assets/banks/mx.png"; // Import your currency icon
 import LoadingModal from "./LoadingModal";
 import { crearNuevaTransaccion } from "../../services/transactionService";
 import { loginUserWithEmail } from "../../services/userService";
+import BTPayMethodCard from './BTPayMethodCard';
+import DWPayMethodCard from "./DWPayMethodCard";
+
+// Importar componentes nuevos
+import AmountInput from "./AmountInput";
+import PaymentMethodSelector from "./PaymentMethodSelector";
+import TermsCheckbox from "./TermsCheckbox";
+import ActionButtons from "./ActionButtons";
+import BankTransfer from "./BankTransfer";
+import CreditCard from "./CreditCard";
+import Wallet from "./DigitalWallet";
 
 interface TransactionModalProps {
   userBalance: number;
   onClose: () => void;
+}
+
+interface Transferencia {
+  id: number;
+  nombre_banco: string;
+  numero_cuenta: string;
+  clabe_o_iban: string;
+  user_id: number;
+}
+
+interface Billetera {
+  id: number;
+  direccion_billetera: string;
+  user_id: number;
 }
 
 const TransactionModal: React.FC<TransactionModalProps> = ({
@@ -38,10 +57,12 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
 
   const [termsAccepted, setTermsAccepted] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false); // Estado para el modal de confirmación
-  const [isLoadingModalOpen, setIsLoadingModalOpen] = useState(false); // Estado para el modal de carga
-  const [userId, setUserId] = useState<number | null>(null); // Estado para almacenar el user id
-  const [userEmail, setUserEmail] = useState<string | null>(null); // Estado para almacenar el email
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+  const [isLoadingModalOpen, setIsLoadingModalOpen] = useState(false);
+  const [userId, setUserId] = useState<number | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [selectedTransferencia, setSelectedTransferencia] = useState<Transferencia | null>(null); // New state for selected transfer
+  const [selectedBilletera, setSelectedBilletera] = useState<Billetera | null>(null); // New state for selected transfer
 
   useEffect(() => {
     const fetchPaymentMethods = async () => {
@@ -55,41 +76,31 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
 
     fetchPaymentMethods();
 
-    // Obtener el user id del localStorage
     const user = localStorage.getItem("user");
     if (user) {
       const parsedUser = JSON.parse(user);
-      setUserId(parsedUser.id); // Guardar el user id en el estado
-      setUserEmail(parsedUser.correo); // Guardar el email en el estado
+      setUserId(parsedUser.id); // Store user ID
+      setUserEmail(parsedUser.correo); // Store email
     }
   }, []);
 
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, ""); // Remove non-digit characters
-    const formattedValue = new Intl.NumberFormat("es-MX", {
-      style: "currency",
-      currency: "MXN",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(parseFloat(value) / 100); // Format as currency
-    setAmount(value ? parseFloat(value) / 100 : 0); // Store as a number
+  const handleAmountChange = (newAmount: number) => {
+    setAmount(newAmount);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validaciones
     if (amount < 0) {
       showToast("El monto debe ser positivo.", "error");
-      return; // Mantiene el modal abierto
+      return;
     }
 
     if (amount < 100) {
       showToast("El monto mínimo debe ser de $100.00 pesos mx", "warning");
-      return; // Mantiene el modal abierto
+      return;
     }
 
-    // Mostrar el modal de confirmación
     setIsConfirmationModalOpen(true);
   };
 
@@ -101,6 +112,73 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
       try {
         localStorage.removeItem("user");
 
+        // Si el método de pago es 3 (Billetera Digital)
+     // Si el método de pago es 3 (Billetera Digital)
+if (paymentMethod === "3") {
+  if (!accountInfo.walletAddress) {
+    showToast("Por favor, ingresa una dirección de billetera válida.", "warning");
+    setIsLoadingModalOpen(false);
+    return;
+  }
+
+  // Crear la billetera digital
+  const billeteraData = {
+    direccion_billetera: accountInfo.walletAddress,
+    user_id: Number(userId),
+  };
+
+  console.log("Creando billetera digital con datos:", billeteraData);
+
+  try {
+    const billeteraResult = await crearBilleteraDigital(billeteraData);
+    console.log("Resultado de la creación de la billetera:", billeteraResult);
+    showToast("Billetera digital creada exitosamente.", "success");
+  } catch (error: any) {
+    console.error("Error al crear la billetera digital:", error);
+  
+    // Verificar si el error tiene una respuesta del servidor
+    if (error.response && error.response.status === 400) {
+      // Verificar si el mensaje de error es el de la cantidad máxima de billeteras
+      if (error.response.data.message === "El usuario ya tiene la cantidad máxima de 5 billeteras digitales.") {
+        showToast("El usuario ya tiene la cantidad máxima de 5 billeteras digitales. Para crear una nueva, elimine una billetera registrada.", "error");
+      } else {
+        showToast("Ocurrió un error al crear la billetera digital.", "error");
+      }
+    } else if (error instanceof Error) {
+      // Manejar otros errores del tipo Error
+      showToast("Ocurrió un error al crear la billetera digital.", "error");
+    } else {
+      // Si no es un error conocido, mostrar un mensaje genérico
+      showToast("Ocurrió un error desconocido.", "error");
+    }
+    
+    setIsLoadingModalOpen(false);
+    return; // Salir de la función si hay un error
+  }
+  
+      } else if (paymentMethod === '1'){
+        if (!accountInfo.accountNumber || !accountInfo.bankName || !accountInfo.clabeOrIban) {
+          showToast("Por favor, ingresa los datos válidos", "warning");
+          setIsLoadingModalOpen(false);
+          return;
+        }
+
+        // Crear la billetera digital
+        const transferData = {
+          nombre_banco: accountInfo.bankName,
+          numero_cuenta: accountInfo.accountNumber,
+          clabe_o_iban: accountInfo.clabeOrIban,
+          user_id: Number(userId),
+        };
+
+        console.log("Creando transferencia con datos:", transferData);
+
+        const TransferenciaResult = await crearTransferenciaBanco(transferData);
+        console.log("Resultado de la creación de la billetera:", TransferenciaResult);
+
+        showToast("Transferencia Bancaria creada exitosamente.", "success");
+      }
+      
         const transactionDetails = {
           usuarioId: Number(userId),
           cantidad: amount,
@@ -114,10 +192,9 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
         localStorage.setItem("user", JSON.stringify(loginResponse.usuario));
  
         await new Promise((resolve) => setTimeout(resolve, 3000));
-         // Mostrar el toast de éxito
-    console.log("Resultado de la transacción: ", result);
 
-        window.location.reload();
+        console.log("Resultado de la transacción: ", result);
+       window.location.reload();
       } catch (error: any) {
         showToast("Error en el login, recargando la página...", "error");
         localStorage.removeItem("user");
@@ -125,144 +202,184 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
       } finally {
         setIsLoadingModalOpen(false);
       }
-    }else{
+    } else {
         setIsLoadingModalOpen(false);
     }
   };
 
   const handleCancel = () => {
-    setIsConfirmationModalOpen(false); // Cerrar el modal de confirmación
+    setIsConfirmationModalOpen(false); 
   };
 
   const renderPaymentMethodComponent = () => {
     switch (paymentMethod) {
-      case "1": // Transferencia Bancaria
-        return (
-          <BankTransfer
-            accountInfo={accountInfo}
-            setAccountInfo={setAccountInfo}
-          />
-        );
-      case "2": // Tarjeta de crédito / débito
-        return (
-          <CreditCard
-            accountInfo={accountInfo}
-            setAccountInfo={setAccountInfo}
-          />
-        );
-      case "3": // Billetera Digital
-        return (
-          <Wallet accountInfo={accountInfo} setAccountInfo={setAccountInfo} />
-        );
+      case "1":
+        return <BankTransfer accountInfo={accountInfo} setAccountInfo={setAccountInfo} />;
+      case "2":
+        return <CreditCard accountInfo={accountInfo} setAccountInfo={setAccountInfo} />;
+      case "3":
+        return <Wallet accountInfo={accountInfo} setAccountInfo={setAccountInfo} />;
       default:
-        return <p className="text-gray-400">Selecciona un método de pago.</p>;
+        return <p className="text-gray-400">Selecciona un nuevo método de pago.</p>;
     }
   };
 
+  // Manejar el clic en una billetera
+  const handleWalletClick = async (billetera: Billetera) => {
+       // Validar que el monto sea mayor o igual a 100
+       if (amount < 100) {
+        showToast("El monto debe ser de al menos $100.00.", "warning");
+        return; // Salir si no cumple la condición
+      }
+      
+    console.log("Billetera seleccionada:", billetera);
+    setSelectedBilletera(billetera); // Save selected transfer
+    setIsConfirmationModalOpen(true); // Open confirmation modal
+  };
+
+  const handleConfirmWallet = async () => {
+    setIsLoadingModalOpen(true);
+    if (userEmail && selectedBilletera) {
+        try {
+            // Asegúrate de que paymentMethod sea un ID válido
+            const validPaymentMethodId = 3
+            
+            localStorage.removeItem("user");
+            const transactionDetails = {
+                usuarioId: Number(selectedBilletera.user_id),
+                cantidad: amount,
+                metodoPagoId: validPaymentMethodId,
+                proposito: accountInfo.porpose || "Sin propósito",
+            };
+  
+            console.log("Detalles de la transacción:", transactionDetails);
+  
+            // Crear una nueva transacción
+            const result = await crearNuevaTransaccion(transactionDetails);
+            console.log("Resultado de la transacción: ", result);
+  
+            const loginResponse = await loginUserWithEmail(userEmail);
+            localStorage.setItem("user", JSON.stringify(loginResponse.usuario));
+            // Simular un delay de 3 segundos antes de continuar
+            await new Promise((resolve) => setTimeout(resolve, 3000));
+            window.location.reload();
+        } catch (error: any) {
+            showToast("Error en la transacción, recargando la página...", "error");
+            localStorage.removeItem("user");
+           window.location.reload();
+        } finally {
+            setIsLoadingModalOpen(false);
+        }
+    } else {
+        setIsLoadingModalOpen(false);
+    }
+  };
+  
+
+ // Manejar el clic en una transferencia
+ const handleTransferClick = async (transferencia: Transferencia) => {
+    // Validar que el monto sea mayor o igual a 100
+    if (amount < 100) {
+      showToast("El monto debe ser de al menos $100.00.", "warning");
+      return; // Salir si no cumple la condición
+    }
+    
+  console.log("Transferencia seleccionada:", transferencia);
+  setSelectedTransferencia(transferencia); // Save selected transfer
+  setIsConfirmationModalOpen(true); // Open confirmation modal
+};
+
+const handleConfirmTransfer = async () => {
+  setIsLoadingModalOpen(true);
+  if (userEmail && selectedTransferencia) {
+      try {
+          // Asegúrate de que paymentMethod sea un ID válido
+          const validPaymentMethodId = 1
+          
+          localStorage.removeItem("user");
+          const transactionDetails = {
+              usuarioId: Number(selectedTransferencia.user_id),
+              cantidad: amount,
+              metodoPagoId: validPaymentMethodId,
+              proposito: accountInfo.porpose || "Sin propósito",
+          };
+
+          console.log("Detalles de la transacción:", transactionDetails);
+
+          // Crear una nueva transacción
+          const result = await crearNuevaTransaccion(transactionDetails);
+          console.log("Resultado de la transacción: ", result);
+
+          const loginResponse = await loginUserWithEmail(userEmail);
+          localStorage.setItem("user", JSON.stringify(loginResponse.usuario));
+          // Simular un delay de 3 segundos antes de continuar
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          window.location.reload();
+      } catch (error: any) {
+          showToast("Error en la transacción, recargando la página...", "error");
+          localStorage.removeItem("user");
+         window.location.reload();
+      } finally {
+          setIsLoadingModalOpen(false);
+      }
+  } else {
+      setIsLoadingModalOpen(false);
+  }
+};
+
+  
+
   return (
     <>
-      <div className="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-50">
-        <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md text-white">
-          <h2 className="text-2xl font-bold mb-4 text-gray-200">
-            Realizar Transacción
-          </h2>
-          <p className="mb-4 text-gray-300">
-            Saldo disponible: ${userBalance.toFixed(2)}
-          </p>
+      <div className="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-50 max-h-[60vh] overflow-y-auto">
+        <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-3xl text-white">
+          <h2 className="text-2xl font-bold mb-4 text-gray-200">Meter Fondos</h2>
+          <p className="mb-4 text-gray-300">Saldo disponible: ${userBalance.toFixed(2)}</p>
+          
+          {/* Contenedor con scroll */}
+          <div className="max-h-[60vh] overflow-y-auto">
+            <form onSubmit={handleSubmit}>
+              {/* Componente de entrada de monto */}
+              <AmountInput amount={amount} onAmountChange={handleAmountChange} />
 
-          <form onSubmit={handleSubmit}>
-            {/* Campo para el monto de la transacción */}
-            <label htmlFor="paymentMethod" className="block text-gray-400 mb-2">
-              Cantidad a depositar en tu cuenta Investra:
-            </label>
-            <div className="mb-4 flex items-center">
-              <span className="material-icons -outlined mr-2">
-                attach_money
-              </span>
-              <input
-                type="text"
-                value={
-                  amount
-                    ? new Intl.NumberFormat("es-MX", {
-                        style: "currency",
-                        currency: "MXN",
-                      }).format(amount)
-                    : "$0.00"
-                }
-                onChange={handleAmountChange}
-                className="bg-gray-700 p-2 rounded w-full focus:outline-none text-white text-lg"
-                placeholder="$0.00"
-                required
+              {/* Componentes de métodos de pago */}
+              {userId && <DWPayMethodCard userId={userId} onWalletClick={handleWalletClick} />}
+              {userId && <BTPayMethodCard userId={userId} onTransferClick={handleTransferClick} />}
+
+              {/* Componente selector de método de pago */}
+              <PaymentMethodSelector
+                paymentMethod={paymentMethod}
+                paymentMethods={paymentMethods}
+                onPaymentMethodChange={setPaymentMethod}
               />
-              <div className="flex flex-col items-center ml-2">
-                <img src={mxIcon} alt="MX" className="w-6 h-6" />
-                <span className="text-xs">MX</span>
-              </div>
-            </div>
 
-            <div className="mb-4">
-              <label htmlFor="paymentMethod" className="block text-gray-400">
-                Método de pago:
-              </label>
-              <select
-                id="paymentMethod"
-                value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-                className="mt-1 block w-full p-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:ring focus:ring-blue-500"
-                required
-              >
-                <option value="">Seleccione un método</option>
-                {paymentMethods.map((method) => (
-                  <option key={method.id} value={method.id}>
-                    {method.nombre_metodo}
-                  </option>
-                ))}
-              </select>
-            </div>
+              {/* Renderizar componente de método de pago seleccionado */}
+              <div className="mb-4">{renderPaymentMethodComponent()}</div>
 
-            <div className="mb-4">{renderPaymentMethodComponent()}</div>
-
-            <div className="mb-4 flex items-center">
-              <input
-                type="checkbox"
-                id="termsAccepted"
-                checked={termsAccepted}
-                onChange={() => setTermsAccepted(!termsAccepted)}
-                className="mr-2"
+              {/* Componente de checkbox de términos */}
+              <TermsCheckbox
+                termsAccepted={termsAccepted}
+                onToggle={() => setTermsAccepted(!termsAccepted)}
               />
-              <label htmlFor="termsAccepted" className="text-gray-400">
-                Acepto los términos y condiciones
-              </label>
-            </div>
 
-            <button
-              type="submit"
-              disabled={!termsAccepted || isLoading}
-              className={`w-full p-2 bg-blue-500 rounded text-white focus:outline-none ${
-                isLoading ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-            >
-              {isLoading ? "Cargando..." : "Realizar Transacción"}
-            </button>
-          </form>
-
-          <button
-            onClick={onClose}
-            className="mt-4 text-gray-400 hover:text-white"
-          >
-            Cerrar
-          </button>
+              {/* Componentes de botones de acción */}
+              <ActionButtons
+                isLoading={isLoading}
+                onSubmit={handleSubmit}
+                onClose={onClose}
+                isSubmitDisabled={!termsAccepted || isLoading}
+              />
+            </form>
+          </div>
         </div>
       </div>
 
-      {/* Modal de confirmación */}
       <ConfirmationModal
-        isOpen={isConfirmationModalOpen}
-        onConfirm={handleConfirm}
-        onCancel={handleCancel}
-      />
+    isOpen={isConfirmationModalOpen}
+    onConfirm={selectedTransferencia ? handleConfirmTransfer : selectedBilletera ? handleConfirmWallet : handleConfirm}
+    onCancel={handleCancel}
+/>
 
-      {/* Modal de carga */}
       <LoadingModal isOpen={isLoadingModalOpen} />
     </>
   );
