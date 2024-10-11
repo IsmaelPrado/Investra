@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { verificarCodigo } from '../services/verificationService';  // Importa el servicio
-import { showToast } from '../services/toastrService';
+import { verificarCodigo } from '../../services/verificationService';  // Importa el servicio
+import { showToast } from '../../services/toastrService';
 
 interface VerificationModalProps {
     correo: string;  // Ahora necesitas pasar el correo como prop

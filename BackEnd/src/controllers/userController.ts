@@ -52,7 +52,7 @@ export const obtenerUsuarios = async (req: Request, res: Response): Promise<Resp
 
 
 // Instancia de Resend con tu clave API
-const resend = new Resend('re_cjFSL4Zj_CWEmmxXr7aw9kGQ16VbEHYCb'); 
+const resend = new Resend('re_TziEts6S_LoJW8TJbAxE4Sbg88bayx56N'); 
 
 export const loginUsuario = async (req: Request, res: Response) => {
     const { correo, contraseña } = req.body;
@@ -286,5 +286,61 @@ export const verificarTokenPorCorreo = async (req: Request, res: Response) => {
     } catch (error) {
         console.error('Error al verificar el token:', error);
         return res.status(500).json({ mensaje: 'Error interno del servidor.' });
+    }
+};
+
+
+export const loginUsuarioConCorreo = async (req: Request, res: Response) => {
+    const { correo } = req.body;
+
+    try {
+        // Verificar si el usuario existe
+        const usuario = await obtenerUsuarioPorCorreo(correo);
+        if (!usuario) {
+            return res.status(401).json({ mensaje: 'Usuario no encontrado' });
+        }
+
+        // Verificar si el usuario tiene un token JWT
+        const { token, fechaExpiracion } = await obtenerTokenPorCorreo(correo);
+        if (!token) {
+            return res.status(401).json({ mensaje: 'No se encontró un token asociado a tu cuenta' });
+        }
+
+        // Verificar si el token es válido
+        try {
+            const decoded: any = jwt.verify(token, process.env.JWT_SECRET || 'secreto');
+            
+            // Si el token es válido, buscar la información del usuario
+            const usuarioInfo = await obtenerUsuarioPorCorreo(correo);
+
+            if (!usuarioInfo) {
+                return res.status(401).json({ mensaje: 'Usuario no encontrado' });
+            }
+
+            // Retornar la información del usuario si todo es correcto
+            return res.status(200).json({
+                mensaje: 'Login exitoso',
+                usuario: {
+                    id: usuarioInfo.id,
+                    nombre: usuarioInfo.nombre,
+                    correo: usuarioInfo.correo,
+                    es_verificado: usuarioInfo.es_verificado,
+                    token: token, // Aquí podrías generar un nuevo token si lo necesitas
+                    saldo: usuarioInfo.saldo
+                }
+            });
+
+        } catch (err) {
+            // Si el token ha expirado o no es válido
+            if (err instanceof jwt.TokenExpiredError) {
+                return res.status(401).json({ mensaje: 'El token ha expirado' });
+            }
+
+            return res.status(500).json({ mensaje: 'Error al verificar el token' });
+        }
+
+    } catch (error) {
+        console.error('Error en el proceso de login:', error);
+        return res.status(500).json({ mensaje: 'Error interno del servidor' });
     }
 };

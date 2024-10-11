@@ -49,3 +49,19 @@ export const loginUser = async (correo: string, contraseña: string): Promise<Lo
         }
     }
 };
+
+export const loginUserWithEmail = async (correo: string): Promise<LoginResponse> => {
+    try {
+        const response = await axios.post('http://localhost:3000/usuarios/login-response', { correo });
+        
+        // Retornar los datos de la respuesta si el login fue exitoso
+        return response.data;
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            // Si el token ha expirado o hubo otro error en el login
+            throw new Error(error.response?.data?.mensaje || 'Error al iniciar sesión: ' + error.message);
+        } else {
+            throw new Error('Error al iniciar sesión: Ocurrió un error inesperado.');
+        }
+    }
+};

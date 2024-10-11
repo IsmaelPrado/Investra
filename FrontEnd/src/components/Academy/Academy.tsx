@@ -4,83 +4,53 @@ import CourseCard from './CourseCard';
 import Recommendations from './Recommendations';
 import SearchBar from './SearchBar';
 import FinancialNews from './FinancialNews';
+import { fetchCourses } from '../../services/courseService';
 
-interface Course {
-  id: number;
-  title: string;
-  description: string;
-  image: string;
-  instructor: string;
-  level: string;
-  rating: number;
-  price: string;
+export interface Course {
+  cursoid: number;
+  nombre: string;
+  descripcion: string;
+  precio: string;
+  duracion: number;
+  urlimagen: string;
+  fechacreacion: string;
+  calificacion: string;
+  nivel: string;
+  autor: string;
+  idioma: string;
+  aprendizajes: {
+    titulo: string;
+    descripcion: string;
+  }[];
 }
 
 const InvestmentCourses: React.FC = () => {
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
 
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
   useEffect(() => {
-    // Generar cursos directamente en el componente
-    const fetchCourses = () => {
+    const getCourses = async () => {
       try {
-        const coursesData: Course[] = [
-          {
-            id: 1,
-            title: 'Introducción a las Inversiones',
-            description: 'Aprende los conceptos básicos de las inversiones y cómo empezar.',
-            image: 'https://via.placeholder.com/300x180',
-            instructor: 'Juan Pérez',
-            level: 'Principiante',
-            rating: 4.5,
-            price: '$50',
-          },
-          {
-            id: 2,
-            title: 'Análisis de Acciones',
-            description: 'Descubre cómo analizar acciones y seleccionar las mejores oportunidades.',
-            image: 'https://via.placeholder.com/300x180',
-            instructor: 'Ana Martínez',
-            level: 'Intermedio',
-            rating: 4.8,
-            price: '$75',
-          },
-          {
-            id: 3,
-            title: 'Fondos de Inversión',
-            description: 'Entiende cómo funcionan los fondos de inversión y sus ventajas.',
-            image: 'https://via.placeholder.com/300x180',
-            instructor: 'Carlos López',
-            level: 'Principiante',
-            rating: 4.3,
-            price: '$30',
-          },
-          {
-            id: 4,
-            title: 'Inversiones en Criptomonedas',
-            description: 'Conoce el mundo de las criptomonedas y cómo invertir en ellas.',
-            image: 'https://via.placeholder.com/300x180',
-            instructor: 'María Gómez',
-            level: 'Avanzado',
-            rating: 4.9,
-            price: '$100',
-          },
-        ];
+        const coursesData = await fetchCourses();
         setCourses(coursesData);
-      } catch (error: any) {
-        setError(error.message);
+      } catch (error) {
+        console.error('Error fetching courses:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCourses();
+    getCourses();
   }, []);
 
+  if (loading) {
+    return <p>Cargando cursos...</p>;
+  }
   const filteredCourses = courses.filter(course =>
-    course.title.toLowerCase().includes(searchTerm.toLowerCase())
+    course.nombre.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -97,22 +67,27 @@ const InvestmentCourses: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col lg:flex-row w-full">
-      <div className="w-full lg:w-3/4 p-4">
+    <div className="main-content flex flex-col lg:flex-row w-full ">
+      <div className="w-full lg:w-3/4 p-4 mt-4">
         <h1 className="text-4xl font-bold text-center text-white mb-8">Cursos de Inversiones</h1>
         <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredCourses.map((course) => (
-            <CourseCard key={course.id} course={course} />
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 min-h-[180px]">
+          {filteredCourses.length > 0 ? (
+            filteredCourses.map((course) => (
+              <CourseCard key={course.cursoid} course={course} />
+            ))
+          ) : (
+            <div className="col-span-1 text-center text-gray-400">
+              No se encontraron cursos.
+            </div>
+          )}
         </div>
       </div>
       <div className='lg:w-1/4 pt-4 pr-4'>
-      <Recommendations recommendations={recommendations} />
-      <h2 className="text-2xl font-bold text-white mt-8 mb-4">Noticias Financieras</h2>
-      <FinancialNews />
+        <Recommendations recommendations={recommendations} />
+        <h2 className="text-2xl font-bold text-white mt-8 mb-4">Noticias Financieras</h2>
+        <FinancialNews />
       </div>
-     
     </div>
   );
 };

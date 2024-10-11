@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Investra from '../assets/Investra.png';
-import UserProfile from './UserProfile';
+import UserProfile from './Authentication/UserProfile';
 
 const Header: React.FC = () => {
   const user = localStorage.getItem('user');
