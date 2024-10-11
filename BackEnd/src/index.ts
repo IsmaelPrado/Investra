@@ -6,6 +6,8 @@ import userRoutes from './routes/userRoutes';
 import newsRoutes from './routes/newsRoutes';
 import transactionRoutes from './routes/transactionRoutes';
 import  paymentMethodRoutes from './routes/paymentMethodRoutes';
+import courseRoutes from './routes/courseRoutes';
+
 
 dotenv.config();
 
@@ -24,6 +26,7 @@ app.use('/usuarios', userRoutes);
 app.use(newsRoutes);
 app.use('/transacciones', transactionRoutes);
 app.use('/paymethod', paymentMethodRoutes);
+app.use('/course', courseRoutes)
 
 // Iniciar el servidor
 app.listen(PORT, () => {

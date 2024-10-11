@@ -31,9 +31,9 @@ const InvestmentForm: React.FC<InvestmentFormProps> = ({ userName, userBalance }
   };
 
   return (
-    <div className=" ">
+    <div className="main-content">
       {/* Mostrar el nombre y el saldo del usuario en la parte superior */}
-      <div className=" p-4 rounded-lg  mb-6 text-center">
+      <div className=" p-4 rounded-lg  mb-6 text-center ">
         <h1 className="text-3xl font-bold text-white">Hola, {userName}!</h1>
         <p className="text-2xl text-gray-300">Saldo disponible: ${userBalance.toFixed(2)}</p>
           {/* Botón para realizar una transacción */}

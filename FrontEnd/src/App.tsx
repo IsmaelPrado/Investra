@@ -12,6 +12,8 @@ import PublicRoute from './components/Authentication/PublicRoute'; // Importa el
 import 'toastr/build/toastr.min.css'; // Importar estilos de Toastr
 import FinancialNews from './components/Academy/Academy';
 import { useNavigate } from 'react-router-dom';  // Asegúrate de importar useNavigate
+import CourseDetails from './components/Academy/CourseDetails/CourseDetails';
+
 
 const App: React.FC = () => {
   return (
@@ -72,6 +74,17 @@ const AppRoutes: React.FC = () => {
           }
         />
       </Route>
+      <Route
+  path="/courses/:courseId"
+  element={
+    <>
+      <Header /> {/* Header solo aparece en rutas privadas */}
+      <CourseDetails />
+    </>
+  }
+/>
+
+  
 
       {/* Usa el componente PublicRoute para proteger las rutas de login y registro */}
       <Route element={<PublicRoute />}>

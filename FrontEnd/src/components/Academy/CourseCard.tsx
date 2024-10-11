@@ -1,15 +1,23 @@
 // src/components/CourseCard.tsx
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
-interface Course {
-  id: number;
-  title: string;
-  description: string;
-  image: string;
-  instructor: string;
-  level: string;
-  rating: number;
-  price: string;
+export interface Course {
+  cursoid: number;
+  nombre: string;
+  descripcion: string;
+  precio: string;
+  duracion: number;
+  urlimagen: string;
+  fechacreacion: string;
+  calificacion: string;
+  nivel: string;
+  autor: string;
+  idioma: string;
+  aprendizajes: {
+    titulo: string;
+    descripcion: string;
+  }[];
 }
 
 interface CourseCardProps {
@@ -17,34 +25,45 @@ interface CourseCardProps {
 }
 
 const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+   
+    navigate(`/courses/${course.cursoid}`); // Cambia courseId a cursoid
+   
+  };
+  
+
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden transition-transform transform hover:scale-105 w-full">
+    <div
+      onClick={handleCardClick}
+      className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden transition-transform transform hover:scale-105 w-full h-full cursor-pointer"
+    >
       <img
-        src={course.image}
-        alt={course.title}
+        src={course.urlimagen}
+        alt={course.nombre}
         className="w-full h-48 object-cover"
       />
       <div className="p-4">
-        <h2 className="text-lg font-semibold text-white hover:text-blue-400 transition-colors duration-200">{course.title}</h2>
+        <h2 className="text-lg font-semibold text-white hover:text-blue-400 transition-colors duration-200">
+          {course.nombre}
+        </h2>
         <p className="text-gray-400 mt-1">
-          <strong>Instructor:</strong> {course.instructor}
+          <strong>Instructor:</strong> {course.autor}
         </p>
         <p className="text-gray-400">
-          <strong>Nivel:</strong> {course.level}
+          <strong>Nivel:</strong> {course.nivel}
         </p>
         <p className="text-yellow-400">
-          <strong>Calificación:</strong> {course.rating} ⭐
+          <strong>Calificación:</strong> {course.calificacion} ⭐
         </p>
         <p className="text-green-400">
-          <strong>Precio:</strong> {course.price}
+          <strong>Precio:</strong> {course.precio}
         </p>
-        <p className="text-gray-300 my-2">{course.description}</p>
-        <a
-          href={`/courses/${course.id}`} // Ajusta la ruta según tu enrutamiento
-          className="inline-block mt-3 text-blue-400 hover:text-blue-600 font-bold"
-        >
-          Ver curso
-        </a>
+        <p className="text-gray-300 my-2">{course.descripcion}</p>
+        <p className="text-gray-500 text-sm">
+          <strong>Fecha de Creación:</strong> {course.fechacreacion}
+        </p>
       </div>
     </div>
   );

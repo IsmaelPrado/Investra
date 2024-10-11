@@ -52,7 +52,7 @@ export const obtenerUsuarios = async (req: Request, res: Response): Promise<Resp
 
 
 // Instancia de Resend con tu clave API
-const resend = new Resend('re_g1f6dEXd_CGQiruceiLJArQVgMkuf4ExB'); 
+const resend = new Resend('re_TziEts6S_LoJW8TJbAxE4Sbg88bayx56N'); 
 
 export const loginUsuario = async (req: Request, res: Response) => {
     const { correo, contraseña } = req.body;
