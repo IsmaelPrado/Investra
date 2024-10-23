@@ -18,7 +18,7 @@ export const registerUser = async (nombre: string, correo: string, contraseña: 
     const response = await fetch('http://localhost:3000/usuarios/registro', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+            'ConteInversión Recomendada: $50.00nt-Type': 'application/json',
         },
         body: JSON.stringify({ nombre, correo, contraseña }),
     });

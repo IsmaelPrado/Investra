@@ -30,6 +30,7 @@ const LoginForm: React.FC = () => {
                 // Si el token ha expirado
                 setMensaje(response.mensaje);
                 setShowVerificationModal(true); // Mostrar modal
+                
             }
         } catch (error: unknown) {
             if (error instanceof Error) {

@@ -15,7 +15,7 @@ export interface Submodule {
   ModuloID: number; // Referencia a Module
   Nombre: string; // Nombre del submódulo
   Orden: number; // Indica el orden del submódulo dentro del módulo
-  TipoContenido: 'video' | 'lectura' | 'ambos' | 'ninguno'; // Tipo de contenido que se presenta
+  TipoContenido: 'video' | 'lectura' | 'ambos' | 'ninguno' | 'examen'; // Tipo de contenido que se presenta
   URLContenido?: string; // URL del video o contenido multimedia
   URLImagen?: string; // URL de la imagen asociada (si existe)
   TextoContenido?: string; // Texto del contenido de aprendizaje
@@ -119,7 +119,61 @@ export async function getSubmodules(courseId: number): Promise<any[]> {
 }
 
 
+export async function purchaseCourse(userId: number, courseId: number): Promise<string> {
+  try {
+      // Obtener el precio del curso
+      const courseQuery = `
+          SELECT precio
+          FROM cursos
+          WHERE cursoid = $1
+      `;
+      const courseResult = await pool.query(courseQuery, [courseId]);
 
+      if (courseResult.rowCount === 0) {
+          return 'El curso no existe.';
+      }
 
+      const coursePrice = parseFloat(courseResult.rows[0].precio);
+      console.log('Precio del curso:', coursePrice);
 
+      const userQuery = `
+          SELECT saldo
+          FROM usuarios
+          WHERE id = $1
+      `;
+      const userResult = await pool.query(userQuery, [userId]);
 
+      if (userResult.rowCount === 0) {
+          return 'El usuario no existe.';
+      }
+
+      const userBalance = parseFloat(userResult.rows[0].saldo);
+      console.log('Saldo del usuario:', userBalance);
+
+      // Comparar el saldo del usuario con el precio del curso
+      if (Math.round(userBalance * 100) < Math.round(coursePrice * 100)) {
+          return 'Saldo insuficiente para realizar la compra.';
+      }
+
+      // Realizar la compra
+      const purchaseQuery = `
+          INSERT INTO compras (usuarioid, cursoid, fechacompra)
+          VALUES ($1, $2, NOW())
+      `;
+      await pool.query(purchaseQuery, [userId, courseId]);
+
+      // Restar el saldo del usuario
+      const newBalance = userBalance - coursePrice;
+      const updateBalanceQuery = `
+          UPDATE usuarios
+          SET saldo = $1
+          WHERE id = $2
+      `;
+      await pool.query(updateBalanceQuery, [newBalance, userId]);
+
+      return 'Compra realizada exitosamente.';
+  } catch (error) {
+      console.error('Error al realizar la compra:', error);
+      throw new Error('Error al acceder a la base de datos');
+  }
+}

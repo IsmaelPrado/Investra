@@ -1,6 +1,6 @@
 
 import { Request, Response } from 'express';
-import { obtenerTodosLosMetodosPago as MetodosPago, contarBilleterasPorUsuario, insertarBilleteraDigital, insertarTarjetaCredito, insertarTransferenciaBanco, obtenerBilleteraDigitalPorUsuario, obtenerTarjetaCreditoPorUsuario, obtenerTransferenciaBancoPorUsuario } from '../models/Transactions/paymentMethod';
+import { obtenerTodosLosMetodosPago as MetodosPago, contarBilleterasPorUsuario, contarTarjetasPorUsuario, contarTranferenciasBancariasPorUsuario, eliminarBilleteraDigitalPorId, eliminarTarjetaCreditoPorId, eliminarTransferenciaBancoPorId, insertarBilleteraDigital, insertarTarjetaCredito, insertarTransferenciaBanco, obtenerBilleteraDigitalPorUsuario, obtenerTarjetaCreditoPorUsuario, obtenerTransferenciaBancoPorUsuario } from '../models/Transactions/paymentMethod';
 // Controlador para obtener MetodosPago
 export const obtenerTodosLosMetodosPago = async (req: Request, res: Response): Promise<Response> => {
     try {
@@ -22,6 +22,13 @@ export const crearTransferenciaBanco = async (req: Request, res: Response): Prom
     }
 
     try {
+          // Verificar cuántas transferencias tiene el usuario
+          const totalTransferencias = await contarTranferenciasBancariasPorUsuario(user_id);
+        
+          // Si el usuario ya tiene 5 billeteras, devolver un error
+          if (totalTransferencias >= 5) {
+              return res.status(400).json({ message: 'El usuario ya tiene la cantidad máxima de 5 transferencias bancarias.' });
+          }
         await insertarTransferenciaBanco({ nombre_banco, numero_cuenta, clabe_o_iban, user_id });
         return res.status(201).json({ message: 'Transferencia bancaria creada exitosamente.' });
     } catch (error) {
@@ -56,6 +63,13 @@ export const crearTarjetaCredito = async (req: Request, res: Response): Promise<
     }
 
     try {
+         // Verificar cuántas transferencias tiene el usuario
+         const totalTarjetas = await contarTarjetasPorUsuario(user_id);
+        
+         // Si el usuario ya tiene 5 billeteras, devolver un error
+         if (totalTarjetas >= 5) {
+             return res.status(400).json({ message: 'El usuario ya tiene la cantidad máxima de 5 tarjetas.' });
+         }
         await insertarTarjetaCredito({ numero_tarjeta, fecha_vencimiento, cvv, nombre_titular, user_id });
         return res.status(201).json({ message: 'Tarjeta de crédito/débito creada exitosamente.' });
     } catch (error) {
@@ -122,5 +136,48 @@ export const obtenerBilleteraDigital = async (req: Request, res: Response): Prom
     } catch (error) {
         console.error('Error al obtener billetera digital:', error);
         return res.status(500).json({ message: 'Error al obtener billetera digital.' });
+    }
+};
+
+//Eliminar métodos de pago
+// Controlador para eliminar una billetera digital por ID
+export const borrarBilleteraDigital = async (req: Request, res: Response): Promise<Response> => {
+    const { id } = req.params;
+
+    try {
+        // Llamar a la función del modelo para eliminar la billetera digital
+        await eliminarBilleteraDigitalPorId(Number(id));
+        return res.status(200).json({ message: 'Billetera digital eliminada exitosamente.' });
+    } catch (error) {
+        console.error('Error al eliminar billetera digital:', error);
+        return res.status(500).json({ message: 'Error al eliminar billetera digital.' });
+    }
+};
+
+// Controlador para eliminar una tarjeta de crédito/débito por ID
+export const borrarTarjetaCredito = async (req: Request, res: Response): Promise<Response> => {
+    const { id } = req.params;
+
+    try {
+        // Llamar a la función del modelo para eliminar la tarjeta de crédito
+        await eliminarTarjetaCreditoPorId(Number(id));
+        return res.status(200).json({ message: 'Tarjeta de crédito/débito eliminada exitosamente.' });
+    } catch (error) {
+        console.error('Error al eliminar tarjeta de crédito/débito:', error);
+        return res.status(500).json({ message: 'Error al eliminar tarjeta de crédito/débito.' });
+    }
+};
+
+// Controlador para eliminar una transferencia bancaria por ID
+export const borrarTransferenciaBanco = async (req: Request, res: Response): Promise<Response> => {
+    const { id } = req.params;
+
+    try {
+        // Llamar a la función del modelo para eliminar la transferencia bancaria
+        await eliminarTransferenciaBancoPorId(Number(id));
+        return res.status(200).json({ message: 'Transferencia bancaria eliminada exitosamente.' });
+    } catch (error) {
+        console.error('Error al eliminar transferencia bancaria:', error);
+        return res.status(500).json({ message: 'Error al eliminar transferencia bancaria.' });
     }
 };

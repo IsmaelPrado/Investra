@@ -1,21 +1,29 @@
 import { useEffect, useState } from 'react';
 import { fetchSubModuleCourse } from '../../services/coursePurchasedService';
 import { useUser } from '../../context/UserContext';
-import YouTube from 'react-youtube'; // Importa el componente de YouTube
+import YouTube from 'react-youtube';
+import ReactMarkdown from 'react-markdown';
+
+interface Question {
+    questionText: string;
+    options: string[];
+    correctAnswer: string;
+}
 
 interface Submodule {
-    submoduloid: number; // ID del submódulo
-    moduloid: number; // Referencia a Module
-    submodulonombre: string; // Nombre del submódulo
-    tipocontenido: 'video' | 'lectura' | 'ambos' | 'ninguno'; // Tipo de contenido que se presenta
-    urlcontenido?: string; // URL del video o contenido multimedia
-    urlimagen?: string; // URL de la imagen asociada (si existe)
-    textocontenido?: string; // Texto del contenido de aprendizaje
+    submoduloid: number;
+    moduloid: number;
+    submodulonombre: string;
+    tipocontenido: 'video' | 'lectura' | 'ambos' | 'ninguno' | 'examen';
+    urlcontenido?: string;
+    urlimagen?: string;
+    textocontenido?: string;
+    questions?: Question[];
 }
 
 interface CourseSubModuleProps {
     courseId: number;
-    moduleId: number; // Añadido moduleId como prop
+    moduleId: number;
 }
 
 const CourseSubModule: React.FC<CourseSubModuleProps> = ({ courseId, moduleId }) => {
@@ -23,21 +31,18 @@ const CourseSubModule: React.FC<CourseSubModuleProps> = ({ courseId, moduleId })
     const [submodules, setSubModules] = useState<Submodule[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [selectedAnswers, setSelectedAnswers] = useState<{ [key: number]: string }>({});
+    const [showResults, setShowResults] = useState<boolean>(false);
 
     useEffect(() => {
         const getSubModules = async () => {
             if (courseId) {
                 try {
                     const allSubmodules = await fetchSubModuleCourse(courseId);
-                    // Filtra submódulos por moduleId
                     const filteredSubmodules = (allSubmodules as Submodule[]).filter((submodule) => submodule.moduloid === moduleId);
                     setSubModules(filteredSubmodules);
                 } catch (error) {
-                    if (error instanceof Error) {
-                        setError(error.message);
-                    } else {
-                        setError('Error desconocido');
-                    }
+                    setError(error instanceof Error ? error.message : 'Error desconocido');
                 } finally {
                     setLoading(false);
                 }
@@ -45,57 +50,118 @@ const CourseSubModule: React.FC<CourseSubModuleProps> = ({ courseId, moduleId })
         };
 
         getSubModules();
-    }, [courseId, moduleId, user]); // Agregar moduleId a las dependencias
+    }, [courseId, moduleId, user]);
+
+    const handleAnswerSelect = (questionIndex: number, answer: string) => {
+        setSelectedAnswers((prevAnswers) => ({
+            ...prevAnswers,
+            [questionIndex]: answer,
+        }));
+    };
+
+    const handleSubmitExam = () => {
+        setShowResults(true);
+    };
+
+    const calculateScore = (questions: Question[]) => {
+        return questions.reduce((score, question, index) => {
+            if (selectedAnswers[index] === question.correctAnswer) {
+                return score + 1;
+            }
+            return score;
+        }, 0);
+    };
+
+    const renderFormattedText = (text: string) => {
+        // Dividir en párrafos por saltos de línea
+        const paragraphs = text.split('\n');
+
+        return paragraphs.map((paragraph, index) => (
+            <p key={index} className="text-gray-300 mt-2 text-lg">
+                {
+                    // Detectar y aplicar negrita al texto entre ** **
+                    paragraph.split(/(\*\*[^*]+\*\*)/g).map((part, i) => {
+                        if (part.startsWith('**') && part.endsWith('**')) {
+                            return <span key={i} className="font-bold">{part.replace(/\*\*/g, '')}</span>;
+                        }
+                        return part;
+                    })
+                }
+            </p>
+        ));
+    };
 
     if (loading) {
-        return <p className="text-center text-lg text-gray-300">Cargando submódulos...</p>;
+        return <p className="text-center text-lg text-blue-300">Cargando submódulos...</p>;
     }
 
     if (error) {
-        return <div className="text-red-600 text-center">{`Error: ${error}`}</div>;
+        return <div className="text-red-500 text-center">{`Error: ${error}`}</div>;
     }
 
     const opts = {
-        height: '480', // Ajusta la altura
-        width: '720', // Ajusta el ancho
-        playerVars: {
-            // Opciones del reproductor de YouTube
-            autoplay: 0, // Cambia a 1 para reproducir automáticamente
-        },
+        height: '480',
+        width: '720',
+        playerVars: { autoplay: 0 },
     };
 
     return (
-        <div className="p-4 h-screen overflow-y-auto">
+        <div className="p-4 h-screen overflow-y-auto bg-gray-900 text-white">
             {submodules.length > 0 ? (
-                <div className="space-y-8"> {/* Aumentar el espacio vertical entre tarjetas */}
+                <div className="space-y-8">
                     {submodules.map((submodule) => (
-                        <div key={submodule.submoduloid} className="bg-white rounded-lg shadow-lg p-6 mb-8 flex flex-col"> {/* Aumentar margen inferior */}
-                            <h2 className="text-3xl font-semibold text-gray-800 mb-6"> {/* Aumentar margen inferior del título */}
-                                {submodule.submodulonombre}
-                            </h2> {/* Título del submódulo */}
-                            
+                        <div key={submodule.submoduloid} className="bg-gray-800 rounded-lg shadow-lg p-6 mb-8 flex flex-col">
+                            <h2 className="text-3xl font-semibold text-blue-400 mb-6">{submodule.submodulonombre}</h2>
+
                             {submodule.tipocontenido === 'video' && submodule.urlcontenido ? (
-                                <div className="flex-grow mb-6 flex justify-center"> {/* Espacio superior e inferior alrededor del video */}
-                                    <div className="w-full max-w-2xl"> {/* Ajusta el ancho máximo */}
-                                        <YouTube videoId={submodule.urlcontenido.split('v=')[1]} opts={opts} /> {/* Usar el componente YouTube */}
+                                <div className="flex-grow mb-6 flex justify-center">
+                                    <div className="w-full max-w-2xl">
+                                        <YouTube videoId={submodule.urlcontenido.split('v=')[1]} opts={opts} />
                                     </div>
                                 </div>
                             ) : submodule.tipocontenido === 'lectura' && submodule.textocontenido ? (
+                                <div className="flex-grow mb-2 p-4 bg-gray-700 rounded-lg">
+                                    {renderFormattedText(submodule.textocontenido)}
+                                </div>
+                            ) : submodule.tipocontenido === 'examen' && submodule.textocontenido ? (
                                 <div className="flex-grow mb-2">
-                                    <p className="text-gray-600 mt-2 text-lg">{submodule.textocontenido}</p>
+                                    {submodule.textocontenido.split('\n').map((option, index) => (
+                                        <label key={index} className="block mb-2">
+                                            <input
+                                                type="radio"
+                                                name={`question-${submodule.submoduloid}`}
+                                                value={option}
+                                                checked={selectedAnswers[submodule.submoduloid] === option}
+                                                onChange={() => handleAnswerSelect(submodule.submoduloid, option)}
+                                                className="mr-2"
+                                            />
+                                            {option}
+                                        </label>
+                                    ))}
+                                    <button
+                                        onClick={handleSubmitExam}
+                                        className="bg-blue-500 text-white px-4 py-2 rounded-lg mt-4"
+                                    >
+                                        Enviar Examen
+                                    </button>
+                                    {showResults && (
+                                        <div className="mt-4 text-center text-lg text-blue-400">
+                                            <p>Has enviado tus respuestas.</p>
+                                        </div>
+                                    )}
                                 </div>
                             ) : submodule.tipocontenido === 'ninguno' && submodule.urlimagen ? (
                                 <div className="flex-grow mb-2">
                                     <img src={submodule.urlimagen} alt={submodule.submodulonombre} className="mt-2 w-full rounded-lg" />
                                 </div>
                             ) : (
-                                <p className="text-center text-gray-300">No hay contenido disponible para este submódulo.</p>
+                                <p className="text-center text-blue-500">No hay contenido disponible para este submódulo.</p>
                             )}
                         </div>
                     ))}
                 </div>
             ) : (
-                <p className="text-center text-gray-300">No hay submódulos disponibles para este curso.</p>
+                <p className="text-center text-blue-500">No hay submódulos disponibles para este curso.</p>
             )}
         </div>
     );

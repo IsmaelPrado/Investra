@@ -6,12 +6,16 @@ import {
     obtenerTodasLasTransacciones,
     obtenerTransaccionPorId,
     eliminarTransaccion,
+    retirarFondosUsuario,
 } from '../controllers/transactionController';
 
 const router = Router();
 
 // Ruta para crear una nueva transacción
 router.post('/', crearNuevaTransaccion);
+
+// Ruta para retirar fondos de una cuenta
+router.post('/retiro', retirarFondosUsuario)
 
 // Ruta para obtener transacciones de un usuario
 router.get('/usuario/:usuarioId', obtenerTransacciones);

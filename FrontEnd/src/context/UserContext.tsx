@@ -6,6 +6,8 @@ interface User {
     nombre: string;
     correo: string;
     es_verificado: boolean;
+    estado_encuesta: boolean;
+    saldo?: number;
 }
 
 interface UserContextType {

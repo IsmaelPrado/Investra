@@ -25,6 +25,15 @@ const Header: React.FC = () => {
         <ul className="flex space-x-4 mr-4 items-center">
           {user ? (
             <>
+             <li>
+                <Link
+                  to="/dashboard"
+                  className="flex items-center text-sm hover:opacity-70 transition-opacity duration-200 py-2 px-4 border border-white rounded-md"
+                >
+                  <span className="material-icons mr-2">dashboard</span>
+                  Dashboard
+                </Link>
+              </li>
               <li>
                 <Link
                   to="/invertir"

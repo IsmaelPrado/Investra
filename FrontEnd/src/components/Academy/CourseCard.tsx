@@ -22,23 +22,31 @@ export interface Course {
 
 interface CourseCardProps {
   course: Course;
+  isPurchased: boolean; // Indica si el curso fue comprado
 }
 
-const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
+const CourseCard: React.FC<CourseCardProps> = ({ course, isPurchased }) => {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
-   
-    navigate(`/courses/${course.cursoid}`); // Cambia courseId a cursoid
-   
+    navigate(`/courses/${course.cursoid}`);
   };
-  
+
+  const handleContinueLearning = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Evita que se dispare el evento de navegación general al hacer clic en el botón
+    navigate(`/courseContent/${course.cursoid}`);
+  };
 
   return (
     <div
       onClick={handleCardClick}
-      className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden transition-transform transform hover:scale-105 w-full h-full cursor-pointer"
+      className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden transition-transform transform hover:scale-105 w-full h-full cursor-pointer relative"
     >
+      {isPurchased && (
+        <div className="absolute top-0 left-0 bg-green-600 text-white text-xs px-2 py-1">
+          Curso comprado
+        </div>
+      )}
       <img
         src={course.urlimagen}
         alt={course.nombre}
@@ -64,6 +72,14 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
         <p className="text-gray-500 text-sm">
           <strong>Fecha de Creación:</strong> {course.fechacreacion}
         </p>
+        {isPurchased && (
+          <button
+            onClick={handleContinueLearning}
+            className="mt-4 bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 transition-colors w-full"
+          >
+            Continuar aprendiendo
+          </button>
+        )}
       </div>
     </div>
   );

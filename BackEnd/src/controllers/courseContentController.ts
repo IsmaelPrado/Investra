@@ -1,6 +1,6 @@
 // src/controllers/CourseController.ts
 import { Request, Response } from 'express';
-import { getCourseDetailsByIds, getModules, getPurchasedCourseIds, getSubmodules } from '../models/courseContent';
+import { getCourseDetailsByIds, getModules, getPurchasedCourseIds, getSubmodules, purchaseCourse } from '../models/courseContent';
 
 export const obtenerCursosComprados = async (req: Request, res: Response) => {
     const { userId } = req.body; // Obtener el userId del cuerpo de la solicitud
@@ -70,3 +70,19 @@ export const obtenerSubmodulosCursoEspecifico = async (req: Request, res: Respon
 };
 
 
+// Controlador para comprar un curso
+export const comprarCurso = async (req: Request, res: Response) => {
+    const { userId, courseId } = req.body; // Obtener userId y courseId del cuerpo de la solicitud
+
+    try {
+        const result = await purchaseCourse(userId, courseId); // Llamar al método de compra de curso
+        if (result === 'Compra realizada exitosamente.') {
+            return res.status(200).json({ message: result }); // Devolver éxito en la compra
+        } else {
+            return res.status(400).json({ message: result }); // Devolver mensaje de error
+        }
+    } catch (error) {
+        console.error('Error al procesar la compra del curso:', error);
+        res.status(500).json({ error: 'Error al procesar la compra del curso' });
+    }
+};
