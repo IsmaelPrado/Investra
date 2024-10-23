@@ -36,11 +36,20 @@ const Header: React.FC = () => {
               </li>
               <li>
                 <Link
-                  to="/noticias"  // Enlace a noticias
+                  to="/academia"  // Enlace a academia
                   className="flex items-center text-sm hover:opacity-70 transition-opacity duration-200 py-2 px-4 border border-white rounded-md"
                 >
-                  <span className="material-icons mr-2">school</span> {/* Icono para noticias */}
+                  <span className="material-icons mr-2">school</span> {/* Icono para academia */}
                   Academia
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/compras"  // Enlace a academia
+                  className="flex items-center text-sm hover:opacity-70 transition-opacity duration-200 py-2 px-4 border border-white rounded-md"
+                >
+                  <span className="material-icons mr-2">assignment</span> {/* Icono para academia */}
+                  Mis Cursos
                 </Link>
               </li>
               <UserProfile user={user} onLogout={handleLogout} />
