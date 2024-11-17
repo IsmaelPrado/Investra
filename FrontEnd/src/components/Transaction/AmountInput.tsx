@@ -5,9 +5,10 @@ import mxIcon from "../../assets/banks/mx.png";
 interface AmountInputProps {
   amount: number;
   onAmountChange: (amount: number) => void;
+  text: String;
 }
 
-const AmountInput: React.FC<AmountInputProps> = ({ amount, onAmountChange }) => {
+const AmountInput: React.FC<AmountInputProps> = ({ amount, onAmountChange, text }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, "");
     const numericValue = value ? parseFloat(value) / 100 : 0;
@@ -17,7 +18,7 @@ const AmountInput: React.FC<AmountInputProps> = ({ amount, onAmountChange }) => 
   return (
     <div className="mb-4">
       <label htmlFor="amount" className="block text-gray-400 mb-2">
-        Cantidad a depositar en tu cuenta Investra:
+        {text}
       </label>
       <div className="mb-4 flex items-center">
         <span className="material-icons -outlined mr-2">attach_money</span>

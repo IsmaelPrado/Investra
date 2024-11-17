@@ -20,3 +20,14 @@ export const crearNuevaTransaccion = async (transaccion: Transaccion): Promise<a
         throw error;
     }
 };
+
+export const retirarFondos = async (transaccion: Transaccion): Promise<any> => {
+    try {
+        const response = await axios.post(`${API_URL}/transacciones/retiro`, transaccion);
+        return response.data;
+    } catch (error) {
+        console.error('Error en el servicio de retiro:', error);
+        throw error;
+    }
+};
+

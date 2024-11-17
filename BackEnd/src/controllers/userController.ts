@@ -21,7 +21,8 @@ export const registrarUsuario = async (req: Request, res: Response): Promise<Res
             correo, 
             contraseña,
             metodo_autenticacion: 'email', // Puedes dejar esto aquí o modificar según sea necesario
-            es_verificado: false // Inicialmente no verificado
+            es_verificado: false, // Inicialmente no verificado
+            estado_encuesta: false // Inicialmente
         });
 
         return res.status(201).json({
@@ -52,7 +53,7 @@ export const obtenerUsuarios = async (req: Request, res: Response): Promise<Resp
 
 
 // Instancia de Resend con tu clave API
-const resend = new Resend('re_TziEts6S_LoJW8TJbAxE4Sbg88bayx56N'); 
+const resend = new Resend('re_6tLU4Fep_PVkQUhrgZJzfj4SzxVX48jvX'); 
 
 export const loginUsuario = async (req: Request, res: Response) => {
     const { correo, contraseña } = req.body;
@@ -82,7 +83,8 @@ export const loginUsuario = async (req: Request, res: Response) => {
                             correo: usuarioPorToken.correo,
                             es_verificado: usuarioPorToken.es_verificado,
                             token: usuarioPorToken.token_refresco,
-                            saldo: usuarioPorToken.saldo
+                            saldo: usuarioPorToken.saldo,
+                            estado_encuesta: usuarioPorToken.estado_encuesta
                         }
                     });
                 }
@@ -108,7 +110,23 @@ export const loginUsuario = async (req: Request, res: Response) => {
                                 <h2 style="color: #4CAF50;">Hola, ${usuario.nombre}</h2>
                                 <p>Tu token ha expirado. Para verificar tu cuenta, utiliza el siguiente nuevo código de verificación:</p>
                                 
-                                <div style="text-align: center; margin: 20px 0;">
+                                <div style="text-align:mensaje: 'Login exitoso',
+                                usuario: {
+                                    id: usuarioPorToken.id,
+                                    nombre: usuarioPorToken.nombre,
+                                    correo: usuarioPorTokemensaje: 'Login exitoso',
+                                    usuario: {
+                                        id: usuarioPorToken.id,
+                                        nombre: usuarioPorToken.nombre,
+                                        correo: usuarioPorToken.correo,
+                                        es_verificado: usuarioPorToken.es_verificado,
+                                        token: usuarioPorToken.token_refresco,
+                                        saldo: usuarioPorToken.saldo,
+                                        estado_encuesta: usuarioPorToken.estado_encuestan.correo,
+                                    es_verificado: usuarioPorToken.es_verificado,
+                                    token: usuarioPorToken.token_refresco,
+                                    saldo: usuarioPorToken.saldo,
+                                    estado_encuesta: usuarioPorToken.estado_encuesta center; margin: 20px 0;">
                                     <span style="font-size: 24px; font-weight: bold; background-color: #e7f4e4; padding: 10px 20px; border-radius: 5px;">
                                         ${nuevoCodigoVerificacion}
                                     </span>
@@ -239,6 +257,7 @@ export const verificarCodigoVerificacion = async (req: Request, res: Response): 
                     nombre: usuario.nombre,
                     correo: usuario.correo,
                     es_verificado: true,
+                    estado_encuesta: usuario.estado_encuesta
                 }
             });
         } else {
@@ -326,7 +345,8 @@ export const loginUsuarioConCorreo = async (req: Request, res: Response) => {
                     correo: usuarioInfo.correo,
                     es_verificado: usuarioInfo.es_verificado,
                     token: token, // Aquí podrías generar un nuevo token si lo necesitas
-                    saldo: usuarioInfo.saldo
+                    saldo: usuarioInfo.saldo,
+                    estado_encuesta: usuarioInfo.estado_encuesta
                 }
             });
 

@@ -51,6 +51,57 @@ export const crearTransaccion = async (transaccion: Transaccion): Promise<Transa
     }
 };
 
+// Función para retirar fondos y actualizar el saldo del usuario
+export const retirarFondos = async (transaccion: Transaccion): Promise<Transaccion> => {
+    const { usuarioId, cantidad, metodoPagoId, proposito } = transaccion;
+
+    // Iniciar una transacción en la base de datos
+    const client = await pool.connect();
+
+    try {
+        await client.query('BEGIN');
+
+        // Obtener el saldo actual del usuario
+        const usuarioResult = await client.query(
+            `SELECT saldo FROM usuarios WHERE id = $1`,
+            [usuarioId]
+        );
+        const saldoActual = usuarioResult.rows[0].saldo;
+
+        // Verificar que el usuario tenga suficiente saldo
+        if (saldoActual < cantidad) {
+            throw new Error('Fondos insuficientes para realizar el retiro');
+        }
+
+        // Insertar la nueva transacción
+        const result = await client.query(
+            `INSERT INTO transacciones (usuario_id, cantidad, metodo_pago_id, proposito, codigo_autenticacion, fecha_creacion, estado)
+             VALUES ($1, $2, $3, $4, '54321', NOW(), 'Realizada') RETURNING *`,
+            [usuarioId, cantidad, metodoPagoId, proposito] // Nota que la cantidad es negativa para representar el retiro
+        );
+
+        const nuevaTransaccion = result.rows[0];
+
+        // Actualizar el saldo del usuario restando la cantidad retirada
+        await client.query(
+            `UPDATE usuarios SET saldo = saldo - $1 WHERE id = $2`,
+            [cantidad, usuarioId]
+        );
+
+        // Confirmar la transacción
+        await client.query('COMMIT');
+
+        return nuevaTransaccion;
+    } catch (error) {
+        // En caso de error, revertir la transacción
+        await client.query('ROLLBACK');
+        throw error;
+    } finally {
+        // Liberar el cliente de la base de datos
+        client.release();
+    }
+};
+
 
 // Función para obtener transacciones de un usuario
 export const obtenerTransaccionesPorUsuario = async (usuarioId: number): Promise<Transaccion[]> => {

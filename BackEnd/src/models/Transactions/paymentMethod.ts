@@ -24,6 +24,15 @@ export interface TransferenciaBanco {
     user_id: number; // Añadir user_id
 }
 
+// Función para contar el número de transferencias bancarias de un usuario
+export const contarTranferenciasBancariasPorUsuario = async (user_id: string): Promise<number> => {
+    const result = await pool.query(
+        `SELECT COUNT(*) FROM transferencia_banco WHERE user_id = $1;`,
+        [user_id]
+    );
+    return parseInt(result.rows[0].count, 10);
+};
+
 // Función para insertar una nueva transferencia bancaria
 export const insertarTransferenciaBanco = async (transferencia: TransferenciaBanco): Promise<void> => {
     const { nombre_banco, numero_cuenta, clabe_o_iban, user_id } = transferencia;
@@ -60,6 +69,15 @@ export interface TarjetaCredito {
     nombre_titular: string;
     user_id: number; // Añadir user_id
 }
+
+// Función para contar el número de transferencias bancarias de un usuario
+export const contarTarjetasPorUsuario = async (user_id: string): Promise<number> => {
+    const result = await pool.query(
+        `SELECT COUNT(*) FROM tarjeta_credito WHERE user_id = $1;`,
+        [user_id]
+    );
+    return parseInt(result.rows[0].count, 10);
+};
 
 // Función para insertar una nueva tarjeta de crédito/débito
 export const insertarTarjetaCredito = async (tarjeta: TarjetaCredito): Promise<void> => {
@@ -132,3 +150,30 @@ export const obtenerBilleteraDigitalPorUsuario = async (userId: number): Promise
     return null;
 };
 
+//Eliminar métodos de pago
+// Función para eliminar una billetera digital por ID
+export const eliminarBilleteraDigitalPorId = async (id: number): Promise<void> => {
+    await pool.query(
+        `DELETE FROM billetera_digital 
+        WHERE id = $1;`,
+        [id]
+    );
+};
+
+// Función para eliminar una tarjeta de crédito/débito por ID
+export const eliminarTarjetaCreditoPorId = async (id: number): Promise<void> => {
+    await pool.query(
+        `DELETE FROM tarjeta_credito 
+        WHERE id = $1;`,
+        [id]
+    );
+};
+
+// Función para eliminar una transferencia bancaria por ID
+export const eliminarTransferenciaBancoPorId = async (id: number): Promise<void> => {
+    await pool.query(
+        `DELETE FROM transferencia_banco 
+        WHERE id = $1;`,
+        [id]
+    );
+};

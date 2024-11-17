@@ -35,3 +35,15 @@ export const fetchSubModuleCourse = async (courseId: number) => {
     throw new Error('No se pudieron obtener los submodulos');
   }
 };
+
+
+// Método para comprar un curso
+export const purchaseCourse = async (userId: number, courseId: number) => {
+  try {
+    const response = await axios.post(`${API_URL}/coursePurchased/comprar`, { userId, courseId });
+    return response.data; // Devuelve el resultado de la compra
+  } catch (error) {
+    console.error('Error al comprar el curso:', error);
+    throw new Error('No se pudo realizar la compra del curso');
+  }
+};

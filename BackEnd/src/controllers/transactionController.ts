@@ -7,6 +7,7 @@ import {
     obtenerTransaccionPorId as obtenerTransaccionPorIdModelo, // Renombrar aquí
     eliminarTransaccion as deleteTransaction,
     Transaccion,
+    retirarFondos,
 } from '../models/Transactions/transactionModel';
 
 // Controlador para crear una nueva transacción
@@ -20,6 +21,20 @@ export const crearNuevaTransaccion = async (req: Request, res: Response) => {
         console.error('Error al crear la transacción:', error);
         res.status(500).json({ error: 'Error al crear la transacción' });
     }
+};
+
+// Controlador para retirar fondos de una cuenta
+export const retirarFondosUsuario = async (req: Request, res: Response) => {
+    const { usuarioId, cantidad, metodoPagoId, proposito }: Transaccion = req.body;
+
+    try {
+        const nuevaTransaccion = await retirarFondos({ usuarioId, cantidad, metodoPagoId, proposito });
+        res.status(201).json(nuevaTransaccion);
+    } catch (error) {
+        console.error('Error al retirar fondos:', error);
+        res.status(500).json({ error: `Error al retirar los fondos: ${error}` });
+    }
+    
 };
 
 // Controlador para obtener transacciones por usuario

@@ -1,6 +1,6 @@
 // src/routes/courseRoutes.ts
 import { Router } from 'express';
-import { obtenerDetallesCursosComprados, obtenerModulosCursoEspecifico, obtenerSubmodulosCursoEspecifico } from '../controllers/courseContentController'; // Asegúrate de que el path sea correcto
+import { comprarCurso, obtenerDetallesCursosComprados, obtenerModulosCursoEspecifico, obtenerSubmodulosCursoEspecifico } from '../controllers/courseContentController'; // Asegúrate de que el path sea correcto
 
 const router = Router();
 
@@ -8,5 +8,6 @@ const router = Router();
 router.post('/', obtenerDetallesCursosComprados)
 router.post('/module', obtenerModulosCursoEspecifico)
 router.post('/submodule', obtenerSubmodulosCursoEspecifico)
+router.post('/comprar', comprarCurso); 
 
 export default router;

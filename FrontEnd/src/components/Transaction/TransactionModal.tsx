@@ -1,13 +1,14 @@
 // src/components/TransactionModal.tsx
 import React, { useEffect, useState } from "react";
 import { showToast } from "../../services/toastrService";
-import { crearBilleteraDigital, getPaymentMethods, PaymentMethod, crearTransferenciaBanco } from "../../services/paymentMethodService";
+import { crearBilleteraDigital, getPaymentMethods, PaymentMethod, crearTransferenciaBanco, crearTarjetaCredito } from "../../services/paymentMethodService";
 import ConfirmationModal from "./ConfirmationModal";
 import LoadingModal from "./LoadingModal";
 import { crearNuevaTransaccion } from "../../services/transactionService";
 import { loginUserWithEmail } from "../../services/userService";
 import BTPayMethodCard from './BTPayMethodCard';
 import DWPayMethodCard from "./DWPayMethodCard";
+
 
 // Importar componentes nuevos
 import AmountInput from "./AmountInput";
@@ -17,6 +18,8 @@ import ActionButtons from "./ActionButtons";
 import BankTransfer from "./BankTransfer";
 import CreditCard from "./CreditCard";
 import Wallet from "./DigitalWallet";
+import { useUser } from "../../context/UserContext";
+import TCDPayMethodCard from "./TCDPayMethodCard";
 
 interface TransactionModalProps {
   userBalance: number;
@@ -34,6 +37,15 @@ interface Transferencia {
 interface Billetera {
   id: number;
   direccion_billetera: string;
+  user_id: number;
+}
+
+interface Tarjeta {
+  id: number;
+  numero_tarjeta: string;
+  fecha_vencimiento: number;
+  cvv: number;
+  nombre_titular: string;
   user_id: number;
 }
 
@@ -63,6 +75,8 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [selectedTransferencia, setSelectedTransferencia] = useState<Transferencia | null>(null); // New state for selected transfer
   const [selectedBilletera, setSelectedBilletera] = useState<Billetera | null>(null); // New state for selected transfer
+  const [selectedTarjeta, setSelectedTarjeta] = useState<Tarjeta | null>(null);
+  const { user } = useUser(); 
 
   useEffect(() => {
     const fetchPaymentMethods = async () => {
@@ -110,10 +124,10 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
 
     if (userEmail) {
       try {
-        localStorage.removeItem("user");
+
 
         // Si el método de pago es 3 (Billetera Digital)
-     // Si el método de pago es 3 (Billetera Digital)
+  
 if (paymentMethod === "3") {
   if (!accountInfo.walletAddress) {
     showToast("Por favor, ingresa una dirección de billetera válida.", "warning");
@@ -171,12 +185,76 @@ if (paymentMethod === "3") {
           user_id: Number(userId),
         };
 
-        console.log("Creando transferencia con datos:", transferData);
+        try {
+          const transferResult = await crearTransferenciaBanco(transferData);
+          console.log("Resultado de la creación de la transferencia bancaria:", transferResult);
+          showToast("Transferencia bancaria creada exitosamente.", "success");
+        } catch (error: any) {
+          console.error("Error al crear la transferencia bancaria:", error);
+        
+          // Verificar si el error tiene una respuesta del servidor
+          if (error.response && error.response.status === 400) {
+            // Verificar si el mensaje de error es el de la cantidad máxima de billeteras
+            if (error.response.data.message === "El usuario ya tiene la cantidad máxima de 5 transferencias bancarias.") {
+              showToast("El usuario ya tiene la cantidad máxima de 5 transferencias bancarias. Para crear una nueva, elimine una transferencia registrada.", "error");
+            } else {
+              showToast("Ocurrió un error al crear la transferencia bancaria.", "error");
+            }
+          } else if (error instanceof Error) {
+            // Manejar otros errores del tipo Error
+            showToast("Ocurrió un error al crear la transferencia bancaria.", "error");
+          } else {
+            // Si no es un error conocido, mostrar un mensaje genérico
+            showToast("Ocurrió un error desconocido.", "error");
+          }
+          
+          setIsLoadingModalOpen(false);
+          return; // Salir de la función si hay un error
+        } 
+      } else if(paymentMethod === '2'){
+        if (!accountInfo.cardNumber || !accountInfo.cvv || !accountInfo.expiryDate) {
+          showToast("Por favor, ingresa los datos válidos", "warning");
+          setIsLoadingModalOpen(false);
+          return;
+        }
 
-        const TransferenciaResult = await crearTransferenciaBanco(transferData);
-        console.log("Resultado de la creación de la billetera:", TransferenciaResult);
+        // Crear la tarjeta
+        const tarjetaData = {
+          numero_tarjeta: accountInfo.cardNumber,
+          fecha_vencimiento: accountInfo.expiryDate,
+          cvv: accountInfo.cvv,
+          nombre_titular: user?.nombre,
+          user_id: Number(userId),
+        };
 
-        showToast("Transferencia Bancaria creada exitosamente.", "success");
+        try {
+          console.log(tarjetaData)
+          const tarjetaResult = await crearTarjetaCredito(tarjetaData);
+         
+          console.log("Resultado de la creación de la transferencia bancaria:", tarjetaResult);
+          showToast("Tarjeta creada exitosamente.", "success");
+        } catch (error: any) {
+          console.error("Error al crear la tarjeta:", error);
+        
+          // Verificar si el error tiene una respuesta del servidor
+          if (error.response && error.response.status === 400) {
+            // Verificar si el mensaje de error es el de la cantidad máxima de billeteras
+            if (error.response.data.message === "El usuario ya tiene la cantidad máxima de 5 tarjetas.") {
+              showToast("El usuario ya tiene la cantidad máxima de 5 tarjetas. Para crear una nueva, elimine una tarjeta registrada.", "error");
+            } else {
+              showToast("Ocurrió un error al crear la tarjeta.", "error");
+            }
+          } else if (error instanceof Error) {
+            // Manejar otros errores del tipo Error
+            showToast("Ocurrió un error al crear la tarjeta.", "error");
+          } else {
+            // Si no es un error conocido, mostrar un mensaje genérico
+            showToast("Ocurrió un error desconocido.", "error");
+          }
+          
+          setIsLoadingModalOpen(false);
+          return; // Salir de la función si hay un error
+        }
       }
       
         const transactionDetails = {
@@ -187,7 +265,7 @@ if (paymentMethod === "3") {
         };
 
         const result = await crearNuevaTransaccion(transactionDetails);
-
+        localStorage.removeItem("user");
         const loginResponse = await loginUserWithEmail(userEmail);
         localStorage.setItem("user", JSON.stringify(loginResponse.usuario));
  
@@ -276,29 +354,31 @@ if (paymentMethod === "3") {
   };
   
 
- // Manejar el clic en una transferencia
- const handleTransferClick = async (transferencia: Transferencia) => {
-    // Validar que el monto sea mayor o igual a 100
-    if (amount < 100) {
-      showToast("El monto debe ser de al menos $100.00.", "warning");
-      return; // Salir si no cumple la condición
-    }
-    
-  console.log("Transferencia seleccionada:", transferencia);
-  setSelectedTransferencia(transferencia); // Save selected transfer
-  setIsConfirmationModalOpen(true); // Open confirmation modal
+
+
+ // Manejar el clic en una tarjeta
+ const handleCardClick = async (tarjeta: Tarjeta) => {
+  // Validar que el monto sea mayor o igual a 100
+  if (amount < 100) {
+    showToast("El monto debe ser de al menos $100.00.", "warning");
+    return; // Salir si no cumple la condición
+  }
+  
+console.log("Tarjeta seleccionada:", tarjeta);
+setSelectedTarjeta(tarjeta); // Save selected transfer
+setIsConfirmationModalOpen(true); // Open confirmation modal
 };
 
-const handleConfirmTransfer = async () => {
+const handleConfirmTarjeta = async () => {
   setIsLoadingModalOpen(true);
-  if (userEmail && selectedTransferencia) {
+  if (userEmail && selectedTarjeta) {
       try {
           // Asegúrate de que paymentMethod sea un ID válido
-          const validPaymentMethodId = 1
+          const validPaymentMethodId = 2
           
           localStorage.removeItem("user");
           const transactionDetails = {
-              usuarioId: Number(selectedTransferencia.user_id),
+              usuarioId: Number(selectedTarjeta.user_id),
               cantidad: amount,
               metodoPagoId: validPaymentMethodId,
               proposito: accountInfo.porpose || "Sin propósito",
@@ -328,23 +408,75 @@ const handleConfirmTransfer = async () => {
 };
 
   
+ // Manejar el clic en una transferencia
+ const handleTransferClick = async (transferencia: Transferencia) => {
+  // Validar que el monto sea mayor o igual a 100
+  if (amount < 100) {
+    showToast("El monto debe ser de al menos $100.00.", "warning");
+    return; // Salir si no cumple la condición
+  }
+  
+console.log("Transferencia seleccionada:", transferencia);
+setSelectedTransferencia(transferencia); // Save selected transfer
+setIsConfirmationModalOpen(true); // Open confirmation modal
+};
+
+const handleConfirmTransfer = async () => {
+setIsLoadingModalOpen(true);
+if (userEmail && selectedTransferencia) {
+    try {
+        // Asegúrate de que paymentMethod sea un ID válido
+        const validPaymentMethodId = 1
+        
+        localStorage.removeItem("user");
+        const transactionDetails = {
+            usuarioId: Number(selectedTransferencia.user_id),
+            cantidad: amount,
+            metodoPagoId: validPaymentMethodId,
+            proposito: accountInfo.porpose || "Sin propósito",
+        };
+
+        console.log("Detalles de la transacción:", transactionDetails);
+
+        // Crear una nueva transacción
+        const result = await crearNuevaTransaccion(transactionDetails);
+        console.log("Resultado de la transacción: ", result);
+
+        const loginResponse = await loginUserWithEmail(userEmail);
+        localStorage.setItem("user", JSON.stringify(loginResponse.usuario));
+        // Simular un delay de 3 segundos antes de continuar
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        window.location.reload();
+    } catch (error: any) {
+        showToast("Error en la transacción, recargando la página...", "error");
+        localStorage.removeItem("user");
+       window.location.reload();
+    } finally {
+        setIsLoadingModalOpen(false);
+    }
+} else {
+    setIsLoadingModalOpen(false);
+}
+};
+
 
   return (
     <>
       <div className="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-50 max-h-[60vh] overflow-y-auto">
         <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-3xl text-white">
           <h2 className="text-2xl font-bold mb-4 text-gray-200">Meter Fondos</h2>
-          <p className="mb-4 text-gray-300">Saldo disponible: ${userBalance.toFixed(2)}</p>
+          <p className="mb-4 text-gray-300">Fondo disponible: ${userBalance.toFixed(2)}</p>
           
           {/* Contenedor con scroll */}
           <div className="max-h-[60vh] overflow-y-auto">
             <form onSubmit={handleSubmit}>
               {/* Componente de entrada de monto */}
-              <AmountInput amount={amount} onAmountChange={handleAmountChange} />
+              <AmountInput amount={amount} onAmountChange={handleAmountChange} text={'Cantidad a Depositar:'}/>
 
               {/* Componentes de métodos de pago */}
               {userId && <DWPayMethodCard userId={userId} onWalletClick={handleWalletClick} />}
               {userId && <BTPayMethodCard userId={userId} onTransferClick={handleTransferClick} />}
+              {userId && <TCDPayMethodCard userId={userId} onCardClick={handleCardClick} />}
 
               {/* Componente selector de método de pago */}
               <PaymentMethodSelector
@@ -376,8 +508,9 @@ const handleConfirmTransfer = async () => {
 
       <ConfirmationModal
     isOpen={isConfirmationModalOpen}
-    onConfirm={selectedTransferencia ? handleConfirmTransfer : selectedBilletera ? handleConfirmWallet : handleConfirm}
+    onConfirm={selectedTarjeta ? handleConfirmTarjeta : selectedTransferencia ? handleConfirmTransfer : selectedBilletera ? handleConfirmWallet : handleConfirm}
     onCancel={handleCancel}
+    text={"¿Estás seguro de que deseas realizar un depósito desde el método de pago seleccionado?"}
 />
 
       <LoadingModal isOpen={isLoadingModalOpen} />
@@ -386,3 +519,4 @@ const handleConfirmTransfer = async () => {
 };
 
 export default TransactionModal;
+

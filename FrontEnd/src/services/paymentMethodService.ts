@@ -39,6 +39,16 @@ export const getTransferenciaBancoPorUsuario = async (userId: number) => {
         throw error;
     }
 };
+// Servicio para eliminar una transferencia bancaria por ID
+export const eliminarTransferenciaBanco = async (id: number) => {
+    try {
+        const response = await axios.delete(`${API_URL}/paymethod/transferencia/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error al eliminar la transferencia bancaria con ID ${id}:`, error);
+        throw error;
+    }
+};
 
 // Servicio para crear una nueva tarjeta de crédito/débito
 export const crearTarjetaCredito = async (tarjetaData: any) => {
@@ -63,6 +73,16 @@ export const getTarjetaCreditoPorUsuario = async (userId: number) => {
     }
 };
 
+// Servicio para eliminar una tarjeta de crédito por ID
+export const eliminarTarjetaCredito = async (id: number) => {
+    try {
+        const response = await axios.delete(`${API_URL}/paymethod/tarjeta/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error al eliminar la tarjeta de crédito con ID ${id}:`, error);
+        throw error;
+    }
+};
 
 // Servicio para crear una nueva billetera digital
 export const crearBilleteraDigital = async (billeteraData: any) => {
@@ -82,6 +102,17 @@ export const getBilleteraDigitalPorUsuario = async (userId: number) => {
         return response.data;
     } catch (error) {
         console.error(`Error al obtener la billetera digital para el usuario ${userId}:`, error);
+        throw error;
+    }
+};
+
+// Servicio para eliminar una billetera digital por ID
+export const eliminarBilleteraDigital = async (id: number) => {
+    try {
+        const response = await axios.delete(`${API_URL}/paymethod/billetera/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error al eliminar la billetera digital con ID ${id}:`, error);
         throw error;
     }
 };

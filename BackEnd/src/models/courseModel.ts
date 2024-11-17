@@ -18,7 +18,6 @@ export interface Course {
 
 export const obtenerTodosLosCursos = async (): Promise<Course[]> => {
     const result = await pool.query('SELECT * FROM cursos');
-    console.log('Cursos obtenidos:', result.rows); // Añadir un log para verificar los datos
     return result.rows; 
 };
 

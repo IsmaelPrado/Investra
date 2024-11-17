@@ -15,6 +15,7 @@ export interface Usuario {
     fecha_creacion?: Date; // Puedes agregar esta propiedad si la quieres manejar
     fecha_actualizacion?: Date; // Igualmente, si la necesitas
     saldo?: number;
+    estado_encuesta: boolean;
 }
 
 // Función para crear un nuevo usuario en la base de datos
@@ -41,6 +42,22 @@ export const obtenerUsuarioPorCorreo = async (correo: string): Promise<Usuario |
         return result.rows[0];
     }
     return null;
+};
+
+// Función para obtener un usuario por su ID
+export const obtenerUsuarioPorId = async (usuarioId: number): Promise<Usuario | null> => {
+    try {
+        const result = await pool.query('SELECT * FROM usuarios WHERE id = $1', [usuarioId]);
+
+        if (result.rows.length > 0) {
+            return result.rows[0];
+        } else {
+            return null; // Usuario no encontrado
+        }
+    } catch (error) {
+        console.error('Error al obtener usuario por ID:', error);
+        throw error;
+    }
 };
 
 // Función para obtener todos los usuarios
@@ -149,3 +166,38 @@ export const obtenerTokenPorCorreo = async (correo: string): Promise<{ token: st
     };
 };
 
+// Función para actualizar el saldo de un usuario
+export const actualizarSaldoUsuario = async (usuarioId: number, nuevoSaldo: number): Promise<void> => {
+    try {
+        await pool.query(
+            'UPDATE usuarios SET saldo = $1, fecha_actualizacion = NOW() WHERE id = $2',
+            [nuevoSaldo, usuarioId]
+        );
+    } catch (error) {
+        console.error('Error al actualizar saldo del usuario:', error);
+        throw error;
+    }
+};
+
+
+// Función para actualizar el estado de la encuesta del usuario
+export const actualizarEstadoEncuesta = async (usuarioId: number): Promise<Usuario | null> => {
+    try {
+        const result = await pool.query(
+            `UPDATE usuarios 
+            SET estado_encuesta = true, fecha_actualizacion = NOW() 
+            WHERE id = $1 
+            RETURNING *`,
+            [usuarioId]
+        );
+
+        if (result.rows.length > 0) {
+            return result.rows[0]; // Devuelve el usuario actualizado
+        } else {
+            return null; // Usuario no encontrado
+        }
+    } catch (error) {
+        console.error('Error al actualizar el estado de la encuesta:', error);
+        throw error;
+    }
+};

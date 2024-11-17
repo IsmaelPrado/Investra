@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { getTransferenciaBancoPorUsuario } from '../../services/paymentMethodService';
-import { FaUniversity } from 'react-icons/fa';
+import { getTransferenciaBancoPorUsuario, eliminarTransferenciaBanco } from '../../services/paymentMethodService';
+import { FaUniversity, FaTimes } from 'react-icons/fa';
 import BBVALogo from '../../assets/banks/bbva.png';
 import SantanderLogo from '../../assets/banks/santander.png';
 import BanorteLogo from '../../assets/banks/banorte.png';
@@ -26,6 +26,8 @@ interface BTPayMethodCardProps {
 const BTPayMethodCard: React.FC<BTPayMethodCardProps> = ({ userId, onTransferClick }) => {
     const [transferencias, setTransferencias] = useState<Transferencia[]>([]);
     const [transferenciaError, setTransferenciaError] = useState<string | null>(null);
+    const [modalVisible, setModalVisible] = useState<boolean>(false);
+    const [transferenciaToDelete, setTransferenciaToDelete] = useState<Transferencia | null>(null);
 
     // Función para devolver el logo correcto según el nombre del banco
     const getBankLogo = (nombre_banco: string) => {
@@ -71,6 +73,23 @@ const BTPayMethodCard: React.FC<BTPayMethodCardProps> = ({ userId, onTransferCli
         fetchTransferencias();
     }, [userId]);
 
+    const handleDeleteClick = (transferencia: Transferencia) => {
+        setTransferenciaToDelete(transferencia);
+        setModalVisible(true);
+    };
+
+    const confirmDelete = async () => {
+        if (transferenciaToDelete) {
+            try {
+                await eliminarTransferenciaBanco(transferenciaToDelete.id);
+                setTransferencias(prev => prev.filter(t => t.id !== transferenciaToDelete.id));
+                setModalVisible(false);
+            } catch (error) {
+                console.error("Error al eliminar la transferencia:", error);
+            }
+        }
+    };
+
     return (
         <div className="p-4 bg-gray-900">
             {transferencias.length > 0 ? (
@@ -81,11 +100,20 @@ const BTPayMethodCard: React.FC<BTPayMethodCardProps> = ({ userId, onTransferCli
                             {transferencias.map((transferencia) => (
                                 <div
                                     key={transferencia.id}
-                                    className="flex-none w-1/2 bg-gray-800 shadow-xl rounded-lg p-6 hover:shadow-2xl transform hover:scale-105 transition-transform duration-300 cursor-pointer"
+                                    className="relative flex-none w-1/2 bg-gray-800 shadow-xl rounded-lg p-6 hover:shadow-2xl transform hover:scale-105 transition-transform duration-300 cursor-pointer"
                                     onClick={() => onTransferClick(transferencia)}
                                     style={{ minWidth: '300px' }} // Aseguramos que cada transferencia tenga un ancho mínimo
                                 >
-                                     <div className="flex items-center mb-4">
+                                    <button
+                                        className="absolute top-2 right-2 text-gray-500 hover:text-red-500"
+                                        onClick={(e) => {
+                                            e.stopPropagation(); // Evitar que el click cierre el modal
+                                            handleDeleteClick(transferencia);
+                                        }}
+                                    >
+                                        <FaTimes />
+                                    </button>
+                                    <div className="flex items-center mb-4">
                                         {getBankLogo(transferencia.nombre_banco) ? (
                                             <img
                                                 src={getBankLogo(transferencia.nombre_banco) as string} // Aquí se asegura que sea una cadena
@@ -104,8 +132,34 @@ const BTPayMethodCard: React.FC<BTPayMethodCardProps> = ({ userId, onTransferCli
                         </div>
                     </div>
                 </div>
+              ) : transferenciaError ? (
+                <div className="text-gray-400">{transferenciaError}</div>
             ) : (
-                <></>
+                <div className="text-gray-400">No hay transferencias bancarias disponibles.</div>
+            )}
+
+
+            {modalVisible && (
+                <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center">
+                    <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
+                        <h2 className="text-white text-lg mb-4">Confirmar Eliminación</h2>
+                        <p className="text-gray-400">¿Estás seguro de que deseas eliminar la transferencia de {transferenciaToDelete?.nombre_banco}?</p>
+                        <div className="flex justify-end mt-4">
+                            <button
+                                className="bg-red-600 text-white px-4 py-2 rounded mr-2"
+                                onClick={confirmDelete}
+                            >
+                                Eliminar
+                            </button>
+                            <button
+                                className="bg-gray-700 text-white px-4 py-2 rounded"
+                                onClick={() => setModalVisible(false)}
+                            >
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );
