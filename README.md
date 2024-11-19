@@ -22,7 +22,7 @@ El proyecto está diseñado para simular la dinámica de mercados financieros, p
 ### **Backend**
 - **Lenguaje**: TypeScript (Node.js)
 - **Framework**: Express.js
-- **Base de datos**: MongoDB
+- **Base de datos**: PsotgreSQL
 - **WebSocket**: Socket.IO (para comunicación en tiempo real)
 - **Patrón de diseño**: Strategy para actualización de precios e inversiones
 
@@ -37,7 +37,7 @@ investra/
 │   ├── controllers/           # Lógica del negocio
 │   ├── routes/                # Rutas de la API REST
 │   ├── strategies/            # Implementación del patrón Strategy
-│   ├── server.ts              # Punto de entrada del servidor
+│   ├── index.ts              # Punto de entrada del servidor
 │   └── package.json           # Dependencias del backend
 │
 ├── frontend/
