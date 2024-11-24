@@ -83,7 +83,7 @@ const DashboardInversiones: React.FC<DashboardInversionesProps> = ({ usuarioId }
                     activosObtenidos.forEach(activo => activosMap.set(activo.id, activo));
                     setActivos(activosMap);
                      // Obtener historial de inversiones
-
+console.log(activosObtenidos);
                      const historialUsuario = await obtenerHistorialPorUsuario(user?.id);
                      setHistorial(historialUsuario);
                 } else {
@@ -105,10 +105,12 @@ const DashboardInversiones: React.FC<DashboardInversionesProps> = ({ usuarioId }
                 setCompras((prevCompras) => 
                   prevCompras.map((compra) => {
                     const updatedInversion = inversionesActualizadas.find(inversion => inversion.id === compra.id);
+                   
                     return updatedInversion ? { ...compra, ...updatedInversion } : compra;
                   })
                 );
              });
+             
         }
 
         return () => {
@@ -211,6 +213,7 @@ const DashboardInversiones: React.FC<DashboardInversionesProps> = ({ usuarioId }
                             const activo = activos.get(accion.activo_id); // Obtener el activo relacionado
                             const historialPrecios = accion.historialPreciosCompra || [];
                             const ultimos5Precios = historialPrecios.slice(-5); 
+                            
                             return (
                                 <div key={accion.id} className="bg-gray-800 border border-gray-700 rounded-lg shadow-md p-4 transition-transform transform hover:scale-105">
                                     <h3 className="text-lg font-semibold text-blue-200">{activo?.nombre}</h3>
@@ -253,6 +256,7 @@ const DashboardInversiones: React.FC<DashboardInversionesProps> = ({ usuarioId }
                         bonos.map((bono) => {
                             const historialPrecios = bono.historialPreciosCompra || [];
                             const ultimos5Precios = historialPrecios.slice(-5); 
+                            console.log(ultimos5Precios);
                             const activo = activos.get(bono.activo_id); // Obtener el activo relacionado
                             return (
                                 <div key={bono.id} className="bg-gray-800 border border-gray-700 rounded-lg shadow-md p-4 transition-transform transform hover:scale-105">

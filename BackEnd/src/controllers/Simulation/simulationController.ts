@@ -8,13 +8,14 @@ import {
   crearHistorialPrecio,
   PriceHistory,
   obtenerHistorialPreciosPorActivo,
-  HistorialCompras,
+  BuysHistory,
   crearHistorialCompra,
   obtenerHistorialCompraPorActivoComprado,
 } from "../../models/Simulation/priceHistoryModel";
 import { Request, Response } from "express";
 import { format } from "date-fns";
-import { CompraActivo, actualizarInversionUsuario, obtenerInversionesPorActivo } from "../../models/Simulation/buyAssetsModel";
+import { BuyAsset, actualizarInversionUsuario, obtenerInversionesPorActivo } from "../../models/Simulation/buyAssetsModel";
+import { DefaultInvestmentUpdateStrategy } from "./StrategySimulation/ConcreteStrategy";
 
 
 export const iniciarSimulacion = (io: Server): void => {
@@ -22,7 +23,7 @@ export const iniciarSimulacion = (io: Server): void => {
       try {
           const activos: Asset[] = await obtenerTodosLosActivos();
           const activosActualizados: Asset[] = [];
-          const inversionesActualizadas: CompraActivo[] = [];
+          const inversionesActualizadas: BuyAsset[] = [];
 
           for (const activo of activos) {
               const minVariacion = parseFloat(activo.min_variacion.toString()) || 0;
@@ -88,7 +89,7 @@ export const iniciarSimulacion = (io: Server): void => {
             }
 
              // Crear historial de compra para esta inversión
-          const historialCompra: HistorialCompras = {
+          const historialCompra: BuysHistory = {
             usuario_id: inversion.usuario_id,
             activo_id: activo.id!,
             precio_inicial: inversion.precio_compra,
@@ -131,6 +132,8 @@ export const iniciarSimulacion = (io: Server): void => {
       }
   }, 30000);
 };
+
+
 
 
 // Función para generar una variación aleatoria dentro del rango, permitiendo valores negativos

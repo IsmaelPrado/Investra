@@ -22,6 +22,8 @@ import assetRoutes from './routes/Simulation/assetRoutes';
 import historyAssetsRoutes from './routes/Simulation/historyAssetsRoutes';
 
 import iniciarProcesamientoBonosVencidos from '../src/models/Simulation/cronModel';
+import { iniciarSimulacionStrategy } from './controllers/Simulation/StrategySimulation/Simulation';
+
 
 const app = express();
 
@@ -76,7 +78,7 @@ io.on('connection', (socket) => {
 // Iniciar el procesamiento de bonos vencidos con Socket.IO
 iniciarProcesamientoBonosVencidos(io);
 // Iniciar la simulación de inversiones
-iniciarSimulacion(io);
+iniciarSimulacionStrategy(io);
 
 // Opcional: Crear tablas si no existen
 crearTablas();

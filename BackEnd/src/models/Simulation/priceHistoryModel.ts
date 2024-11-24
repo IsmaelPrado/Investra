@@ -8,7 +8,7 @@ export interface PriceHistory {
     timestamp?:  Date; // Mantener como objeto Date
 }
 
-export interface HistorialCompras {
+export interface BuysHistory {
     id?: number;
     usuario_id: number;
     activo_id: number;
@@ -33,7 +33,7 @@ export const crearHistorialPrecio = async (historial: PriceHistory): Promise<Pri
     return result.rows[0];
 };
 
-export const crearHistorialCompra = async (historial: HistorialCompras): Promise<HistorialCompras> => {
+export const crearHistorialCompra = async (historial: BuysHistory): Promise<BuysHistory> => {
     const { usuario_id, activo_id, precio_inicial, precio_final, cantidad, fecha_compra, fecha_final, estado, tipo_activo } = historial;
     const result = await pool.query(
         `INSERT INTO historial_compras (usuario_id, activo_id, precio_inicial, precio_final, cantidad, fecha_compra, fecha_final, estado, tipo_activo)
@@ -54,7 +54,7 @@ export const obtenerHistorialPreciosPorActivo = async (activo_id: number): Promi
 };
 
 // Función para obtener el historial de compras de un activo
-export const obtenerHistorialCompraPorActivoComprado = async (activo_id: number): Promise<HistorialCompras[]> => {
+export const obtenerHistorialCompraPorActivoComprado = async (activo_id: number): Promise<BuysHistory[]> => {
     const result = await pool.query(
         `SELECT * FROM historial_compras WHERE activo_id = $1 ORDER BY fecha_compra ASC`,
         [activo_id]
