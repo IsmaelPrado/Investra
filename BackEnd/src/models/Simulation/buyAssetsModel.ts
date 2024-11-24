@@ -1,8 +1,8 @@
 import pool from '../../config';
 import { Asset } from './assetModel';
-import { HistorialCompras } from './priceHistoryModel';
+import { BuysHistory } from './priceHistoryModel';
 
-export interface CompraActivo {
+export interface BuyAsset {
     id?: number;
     usuario_id: number;
     activo_id: number;
@@ -18,11 +18,11 @@ export interface CompraActivo {
     rendimientoPorcentual?: number;
     cambioPrecio30Segundos?: number;
     totalInversion?: number;
-    historialPreciosCompra?: HistorialCompras[];
+    historialPreciosCompra?: BuysHistory[];
 }
 
 // Función para crear una nueva compra de activo (acciones)
-export const crearCompraAccion = async (compra: CompraActivo): Promise<CompraActivo> => {
+export const crearCompraAccion = async (compra: BuyAsset): Promise<BuyAsset> => {
     const { usuario_id, activo_id, cantidad, precio_compra, estado, tipo_activo, precio_actual, ganancia_perdida } = compra;
 
     if (!cantidad) {
@@ -62,7 +62,7 @@ export const crearCompraAccion = async (compra: CompraActivo): Promise<CompraAct
         client.release(); // Libera el cliente
     }
 };
-export const crearCompraBono = async (compra: CompraActivo): Promise<CompraActivo> => {
+export const crearCompraBono = async (compra: BuyAsset): Promise<BuyAsset> => {
     const { usuario_id, activo_id, cantidad, precio_compra, fecha_vencimiento, estado, tipo_activo } = compra;
 
     const client = await pool.connect();
@@ -91,7 +91,7 @@ export const crearCompraBono = async (compra: CompraActivo): Promise<CompraActiv
 };
 
 // Función para obtener una compra por su ID
-export const obtenerCompraPorId = async (compraId: number): Promise<CompraActivo | null> => {
+export const obtenerCompraPorId = async (compraId: number): Promise<BuyAsset | null> => {
     const result = await pool.query('SELECT * FROM compras_activos WHERE id = $1', [compraId]);
     if (result.rows.length > 0) {
         return result.rows[0];
@@ -110,14 +110,14 @@ export const actualizarEstadoCompra = async (compraId: number, estado: 'vendido'
 };
 
 // Función para obtener todas las compras de un usuario
-export const obtenerComprasPorUsuario = async (usuarioId: number): Promise<CompraActivo[]> => {
+export const obtenerComprasPorUsuario = async (usuarioId: number): Promise<BuyAsset[]> => {
     const result = await pool.query('SELECT * FROM compras_activos WHERE usuario_id = $1', [usuarioId]);
     return result.rows;
 };
 
 
 // Función para obtener todas las inversiones (compras activas) de un activo específico
-export const obtenerInversionesPorActivo = async (activoId: number): Promise<CompraActivo[]> => {
+export const obtenerInversionesPorActivo = async (activoId: number): Promise<BuyAsset[]> => {
     try {
         const result = await pool.query(
             `SELECT * FROM compras_activos WHERE activo_id = $1 AND estado = 'comprado'`,
